@@ -20,7 +20,6 @@ def readFileIgnoringLinesForCondition(fileLocation, shouldBeIgnored):
 		for line in sourceFile:
 			if not shouldBeIgnored(line):
 				validLines.append(line.strip())
-			else: print line
 	return validLines
 
 def readCSVFile(fileLocation):
