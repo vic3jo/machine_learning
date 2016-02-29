@@ -21,6 +21,8 @@ Poker Hands classification and Exchange rate prediction, using Neural Networks.
     .
     :-- scripts : This folder contains all scripts files used in the project.
     .    .
+    .    :-- utilities.py :  this script contain utilities functions used through the project.
+    .    .
     .	 :-- breast_cancer
     			.
     			:- breast_cancer_preprocessing.py: script to preprocess breast cancer file.
