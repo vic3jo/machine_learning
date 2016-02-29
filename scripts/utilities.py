@@ -5,6 +5,24 @@ Description: This file contains information used through out the project.
 
 import csv
 
+def readFileIgnoringLinesForCondition(fileLocation, shouldBeIgnored):
+	'''
+	Reads a file at a given location but ignores those line
+	that satisfied certain condition.
+	parameters:
+		fileLocation -> location of the csv to read
+		shouldBeIgnored -> a function that takes a string and returns a boolean
+	returns: the read lines of the files except those that matched the 
+			  given condition.
+	'''
+	validLines = []
+	with open(fileLocation, 'rt') as sourceFile:
+		for line in sourceFile:
+			if not shouldBeIgnored(line):
+				validLines.append(line.strip())
+			else: print line
+	return validLines
+
 def readCSVFile(fileLocation):
 	'''
 	Reads a csv at a given location
@@ -36,6 +54,13 @@ def writeCSVFile(rows, header, fileLocation):
 			writer.writerow(row)
 		destinationFile.close()
 
+def saveFileAtLocation(lines, fileLocation):
+	with open(fileLocation, 'w') as destinationFile:
+		for line  in lines:
+			destinationFile.write(\
+				"{}\n".format(line)
+			)
+	destinationFile.close()
 
 def removeMissingValues(rows):
 	'''

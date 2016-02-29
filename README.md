@@ -12,7 +12,7 @@ Poker Hands classification and Exchange rate prediction, using Neural Networks.
     .    :-- unprocessed : data before being processed
     .    .      .
     .    .      :-- breast_cancer: contains data sets for the breast cancer problem.
-    .    .      :-- currency_exchange_timeseries: contains data sets for the currency 
+    .    .      :-- currency_exchange: contains data sets for the currency 
     .    .      .				exchange timeseries problem.
     .    .      :-- poker_hand: contains data sets for the poker hands problem.
     .    .
@@ -24,10 +24,14 @@ Poker Hands classification and Exchange rate prediction, using Neural Networks.
     .    :-- utilities.py :  this script contain utilities functions used through the project.
     .    .
     .	 :-- breast_cancer
+    	 .    	.
+    	 .		:- breast_cancer_preprocessing.py: script to preprocess breast cancer file.
+         .      
+         .
+         :-- currency_exchange
     			.
-    			:- breast_cancer_preprocessing.py: script to preprocess breast cancer file.
-
-
+    			:- currencty_preprocessing.py: script to preprocess currency exchange problem files.
+    			
 
 * How it works:
 
