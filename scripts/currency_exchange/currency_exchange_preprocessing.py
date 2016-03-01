@@ -7,7 +7,8 @@ Description: This file preprocessed data for the currency exchange problem.
 			 The data is normalized by dividing the rate output value by the max.
 """
 
-import sys, os, csv
+import sys, os, csv, pywt
+import numpy as np
 import matplotlib.pyplot as plt
 from random import shuffle
 
@@ -21,6 +22,29 @@ sys.path.append(\
 
 import utilities as utl
 
+
+def denoise(signal, levels = 3):
+	"""
+	Applies Haar Wavelet transforms to denoise the data signal
+	Parameters:
+		signal -> signal to be denoised
+		levels -> max level of decomposition.
+	returns: the denoised signal.
+	"""
+	wavelet = pywt.Wavelet('haar')
+	n = levels
+	threshold = np.sqrt( 2*np.log( n*np.log2(n) ) )
+	coefficients = pywt.wavedec(\
+		signal,
+		wavelet,
+		level = n
+	)
+	# Soft Threshold function
+	softThresholdFunction = lambda x: pywt.threshold(x, threshold)
+	conservedCoefficients =  map(softThresholdFunction, coefficients)
+	return pywt.waverec(conservedCoefficients, wavelet)
+
+	
 
 def getClosingDaySamples(data):
 	"""
@@ -135,7 +159,25 @@ def normalize(data, xMax):
 		xMax -> max value
 	returns: the normalized data.
 	"""
-	return [(x[0], x[1], str(float(x[2])/xMax)) for x in data]
+	days, hours, outputs = zip(*data)
+	outputs = map(lambda x: str(float(x)/xMax), outputs)
+	return zip(days, hours, outputs)
+
+
+def denoiseOutputData(data, levels = 3):
+	"""
+	Denoises the output signal of the data.
+	Parameters:
+		data   -> data that contain the signal to denoise
+		levels -> max level of decomposition of the signal
+	Returns: the data with the signal denoised.
+	"""
+	days, hours, outputs = zip(*data) 
+	outputs = denoise(outputs, levels)
+	outputs = map(lambda x: str(x), outputs)
+	return zip(days, hours, outputs)
+
+
 
 if __name__ == "__main__":
 	firstSourceFileLocation = '{}/../../data/unprocessed/currency_exchange/C1-5.dat'.format(currentFileDir)
@@ -155,7 +197,7 @@ if __name__ == "__main__":
 	wholeData = []
 	wholeData.extend(dataFirstHalf)
 	wholeData.extend(dataSecondHalf)
-
+	# This value is going to be used as normalizer.
 	maxExchangeRateValue = max(float(x.split()[2]) for x in wholeData)
 	
 
@@ -170,25 +212,39 @@ if __name__ == "__main__":
 		hourlySampledData
 	)
 
+	# Normalizing daily data
 	atClosingDaySampledDataNormalized = normalize(\
 		atClosingDaySampledData,
 		maxExchangeRateValue
 	)
 
+	# Normalizing hourly data
 	hourlySampledDataNormalized = normalize(\
 		hourlySampledData,
 		maxExchangeRateValue
 	)
 
-	# Plotting the normalized time series after sampling
-	plotTimeSeries(\
-		atClosingDaySampledDataNormalized,
-		hourlySampledDataNormalized,
-		"Normalized"
+	# Denoising daily data
+	atClosingDaySampledDataDenoised = denoiseOutputData(\
+		atClosingDaySampledDataNormalized, 2
 	)
 
-	storeProcessedData(atClosingDaySampledDataNormalized, 'at_closing_day')
-	storeProcessedData(hourlySampledDataNormalized, 'hourly')
+	# Denoising hourly data
+	hourlySampledDataDenoised = denoiseOutputData(\
+		hourlySampledDataNormalized, 3
+	)
+
+
+	# Plotting the normalized and denoised time series after sampling
+	plotTimeSeries(\
+		atClosingDaySampledDataDenoised,
+		hourlySampledDataDenoised,
+		"Normalized and Denoised"
+	)
+
+	# Storing processed data
+	storeProcessedData(atClosingDaySampledDataDenoised, 'at_closing_day')
+	storeProcessedData(hourlySampledDataDenoised, 'hourly')
 	
 	
 
