@@ -6,9 +6,12 @@ Description: This file contains information used through out the project.
 import csv, os, pickle
 from pybrain.datasets import SupervisedDataSet
 from pybrain.supervised.trainers import BackpropTrainer
+from pybrain.structure import SigmoidLayer
 from pybrain.tools.shortcuts import buildNetwork
 import numpy as np
 from collections import namedtuple
+
+currentFileDir = os.path.dirname(os.path.abspath(__file__))
 
 def readFileIgnoringLinesForCondition(fileLocation, shouldBeIgnored):
 	'''
@@ -101,7 +104,14 @@ def __createSupervisedDataSet(inputs, outputs):
 	return dataset
 
 
-def trainNetwork(inputs, outputs, unitsInHiddenLayer = 2, momentum = 0.1, epochs = 100, outputLayer = None):
+def trainNetwork(\
+	inputs,
+	outputs,
+	unitsInHiddenLayer = 2,
+	momentum = 0.1,
+	epochs = 100,
+	outputLayer = SigmoidLayer
+):
 	rows, numberOfFeatures = inputs.shape
 	rows, outputSize = outputs.shape
 
@@ -124,10 +134,13 @@ def trainNetwork(inputs, outputs, unitsInHiddenLayer = 2, momentum = 0.1, epochs
 		momentum = momentum
 	)
 	trainer.trainEpochs(epochs)
-
 	return neuralNetwork
 
-def readDataSetAsMatrix(path, skipRows = 0, delimitier = r'\s' ):
+def readDataSetAsMatrix(\
+	path,
+	skipRows = 0,
+	delimitier = ' '
+):
 	with open(path) as readFile: 
 		return np.loadtxt(\
 		readFile,
@@ -151,7 +164,7 @@ def readModelFromLocation(location):
 
 
 # Some constants
-currentFileDir = os.path.dirname(os.path.abspath(__file__))
+
 SAMPLING_TYPE = {
 	'At'
 }
@@ -164,13 +177,11 @@ CURRENCY_EXCHANGE_PROCESSED_DATA_FOLDER = '{}/../data/processed/currency_exchang
 CURRENCY_EXCHANGE_TRAINING_FILE = lambda samplingType: '{}{}_training.dat'.format(CURRENCY_EXCHANGE_PROCESSED_DATA_FOLDER, samplingType)
 CURRENCY_EXCHANGE_CROSS_VALIDATION_FILE = lambda samplingType: '{}{}_cross_validation.dat'.format(CURRENCY_EXCHANGE_PROCESSED_DATA_FOLDER, samplingType)
 CURRENCY_EXCHANGE_TESTING_FILE = lambda samplingType: '{}{}_testing.dat'.format(CURRENCY_EXCHANGE_PROCESSED_DATA_FOLDER, samplingType)
-
 CURRENCY_EXCHANGE_MODEL_FOLDER = '{}/../models/currency_exchange/'.format(currentFileDir)
 CURRENCY_EXCHANGE_MODEL_FILE = lambda samplingType: '{}{}_model.pkl'.format(CURRENCY_EXCHANGE_MODEL_FOLDER, samplingType)
 
 
 
-Breast_cancer_training_file = "{}/../data/processed/breast_cancer/training.csv".format(currentFileDir)
-Breast_cancer_testing_file = "{}/../data/processed/breast_cancer/testing.csv".format(currentFileDir)
-
-Breast_cancer_model_file = "{}/../models/breast_cancer/breast_cancer_model.pkl".format(currentFileDir)
+BREAST_CANCER_TRAINING_FILE = "{}/../data/processed/breast_cancer/training.csv".format(currentFileDir)
+BREAST_CANCER_TESTING_FILE = "{}/../data/processed/breast_cancer/testing.csv".format(currentFileDir)
+BREAST_CANCER_MODEL_FILE = "{}/../models/breast_cancer/breast_cancer_model.pkl".format(currentFileDir)
