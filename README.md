@@ -54,6 +54,12 @@ Poker Hands classification and Exchange rate prediction, using Neural Networks.
 			 hourly_testing.csv
 
 			 at data/processed/currency_exchange/ directory
+             
+    3. Run: python scripts preprocessingTesting.py
+                AND
+            python scripts preprocessingTraining.py
+
+
 
 * Dependencies:
 	1. Python 2.7    		  - https://www.python.org/downloads/    and    
