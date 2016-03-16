@@ -90,10 +90,10 @@ def __createSupervisedDataSet(inputs, outputs):
 		outputSize
 	)
 	
-	inputs = map(lambda x: tuple(x), inputs.tolist())
-	outputs = map(lambda x: tuple(x), outputs.tolist())
+	inputs = list(map(lambda x: tuple(x), inputs.tolist()))
+	outputs = list(map(lambda x: tuple(x), outputs.tolist()))
 	
-	for r in xrange(rows):
+	for r in range(rows):
 		dataset.addSample(\
 			inputs[r],
 			outputs[r]
@@ -101,7 +101,7 @@ def __createSupervisedDataSet(inputs, outputs):
 	return dataset
 
 
-def trainNetwork(inputs, outputs, unitsInHiddenLayer = 2):
+def trainNetwork(inputs, outputs, unitsInHiddenLayer = 2, momentum = 0.1, epochs = 100, outputLayer = None):
 	rows, numberOfFeatures = inputs.shape
 	rows, outputSize = outputs.shape
 
@@ -109,7 +109,8 @@ def trainNetwork(inputs, outputs, unitsInHiddenLayer = 2):
 		numberOfFeatures,
 		unitsInHiddenLayer,
 		outputSize,
-		bias = True
+		bias = True,
+		outclass = outputLayer
 	)
 
 	dataset = __createSupervisedDataSet(\
@@ -119,23 +120,29 @@ def trainNetwork(inputs, outputs, unitsInHiddenLayer = 2):
 	
 	trainer = BackpropTrainer(\
 		neuralNetwork,
-		dataset
+		dataset,
+		momentum = momentum
 	)
-	trainer.trainUntilConvergence()
+	trainer.trainEpochs(epochs)
 
 	return neuralNetwork
 
-def readDataSetAsMatrix(path):
-	with open(path) as readFile: return np.loadtxt(readFile)
+def readDataSetAsMatrix(path, skipRows = 0, delimitier = r'\s' ):
+	with open(path) as readFile: 
+		return np.loadtxt(\
+		readFile,
+		skiprows = skipRows,
+		delimiter = delimitier
+	)
 
 
 def saveModelAtLocation(model, location):
-	with open(location, 'w+') as modelFile:
+	with open(location, 'wb') as modelFile:
 		pickle.dump(model, modelFile)
 
 
 def readModelFromLocation(location):
-	with open(location) as modelFile:
+	with open(location, 'rb') as modelFile:
 		return pickle.load(modelFile)
 
 
@@ -160,3 +167,10 @@ CURRENCY_EXCHANGE_TESTING_FILE = lambda samplingType: '{}{}_testing.dat'.format(
 
 CURRENCY_EXCHANGE_MODEL_FOLDER = '{}/../models/currency_exchange/'.format(currentFileDir)
 CURRENCY_EXCHANGE_MODEL_FILE = lambda samplingType: '{}{}_model.pkl'.format(CURRENCY_EXCHANGE_MODEL_FOLDER, samplingType)
+
+
+
+Breast_cancer_training_file = "{}/../data/processed/breast_cancer/training.csv".format(currentFileDir)
+Breast_cancer_testing_file = "{}/../data/processed/breast_cancer/testing.csv".format(currentFileDir)
+
+Breast_cancer_model_file = "{}/../models/breast_cancer/breast_cancer_model.pkl".format(currentFileDir)
