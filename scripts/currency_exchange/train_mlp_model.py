@@ -1,5 +1,4 @@
 import sys, os
-from pybrain.structure import LinearLayer
 # Adding reference to the scripts folder
 currentFileDir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(currentFileDir + '/../')
@@ -23,7 +22,7 @@ def trainModel(unitsInHiddenLayer = 4):
 		inputs,
 		outputs,
 		unitsInHiddenLayer = unitsInHiddenLayer,
-		outputLayer = LinearLayer,
+		builder = utl.MLP_LINEAR_BUILDER,
 		epochs = 1000
 	)
 
@@ -37,7 +36,7 @@ if __name__ == "__main__":
 	print("Saving Trained Model")
 	utl.saveModelAtLocation(
 		model,
-		utl.CURRENCY_EXCHANGE_MODEL_FILE(\
+		utl.CURRENCY_EXCHANGE_MLP_MODEL_FILE(\
 			utl.SAMPLING_TYPE.AT_CLOSING_DAY
 		)
 	)

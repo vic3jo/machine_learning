@@ -14,12 +14,12 @@ if __name__ == "__main__":
 	# Reading testing data
 	testingData = utl.readDataSetAsMatrix(utl.BREAST_CANCER_TESTING_FILE, 1, ',')
 
-	inputs = testingData[:, :9]
+	inputs = utl.normalize(testingData[:, :9], 1, 10)
 	outputs = testingData[:, 9:]
 	# Remapping outputs
 	outputs = (outputs - 2) / 2
 	neuralNetwork = utl.readModelFromLocation(\
-		utl.BREAST_CANCER_MODEL_FILE
+		utl.BREAST_CANCER_MLP_MODEL_FILE
 	)
 
 	rows, numberOfFeatures = inputs.shape

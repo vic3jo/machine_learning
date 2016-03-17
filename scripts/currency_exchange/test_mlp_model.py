@@ -21,7 +21,7 @@ if __name__ == "__main__":
 	inputs = testingData[:-1, 2:]
 	outputs = testingData[1:, 2:]
 	neuralNetwork = utl.readModelFromLocation(\
-		utl.CURRENCY_EXCHANGE_MODEL_FILE(\
+		utl.CURRENCY_EXCHANGE_MLP_MODEL_FILE(\
 			utl.SAMPLING_TYPE.AT_CLOSING_DAY
 		)
 	)
