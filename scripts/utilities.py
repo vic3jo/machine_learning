@@ -14,6 +14,7 @@ from pybrain.tools.shortcuts import buildNetwork
 from pybrain.structure import FullConnection
 import numpy as np
 from collections import namedtuple
+import matplotlib.pyplot as plt
 
 currentFileDir = os.path.dirname(os.path.abspath(__file__))
 
@@ -248,8 +249,28 @@ def readModelFromLocation(location):
 	with open(location, 'rb') as modelFile:
 		return pickle.load(modelFile)
 
+def createPattern(data, width = 4):
+	rows = data.ravel().shape[0]
+	
+	result = []
+	for r in range(rows - width):
+		result.append(data[r:r+width, 0])
+	return np.array(result)
 
-
+def plotTimeSeries(real, predicted, extraTitle=""):
+	"""
+	Plots the time series.
+	Parameters:
+			 real 
+			 predicted 
+	"""
+	plt.subplot(211)
+	plt.title(" real {}".format(extraTitle))
+	plt.plot(real)
+	plt.subplot(212)
+	plt.title("predicted {}".format(extraTitle))
+	plt.plot(predicted)
+	plt.show()
 
 
 
@@ -264,7 +285,8 @@ CURRENCY_EXCHANGE_TESTING_FILE = lambda samplingType: '{}{}_testing.dat'.format(
 CURRENCY_EXCHANGE_MODEL_FOLDER = '{}/../models/currency_exchange/'.format(currentFileDir)
 CURRENCY_EXCHANGE_MLP_MODEL_FILE = lambda samplingType: '{}{}_mlp_model.pkl'.format(CURRENCY_EXCHANGE_MODEL_FOLDER, samplingType)
 CURRENCY_EXCHANGE_RBF_MODEL_FILE = lambda samplingType: '{}{}_rbf_model.pkl'.format(CURRENCY_EXCHANGE_MODEL_FOLDER, samplingType)
-
+DAILY_WIDTH = 5
+HOURLY_WIDTH = 5
 
 BREAST_CANCER_TRAINING_FILE = "{}/../data/processed/breast_cancer/training.csv".format(currentFileDir)
 BREAST_CANCER_TESTING_FILE = "{}/../data/processed/breast_cancer/testing.csv".format(currentFileDir)

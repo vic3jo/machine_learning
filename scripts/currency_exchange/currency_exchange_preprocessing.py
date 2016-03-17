@@ -112,17 +112,15 @@ def processedFileNamesLocations(samplingType):
 	"""
 	dirName = '{}/../../data/processed/currency_exchange/'.format(currentFileDir)
 	training = '{}{}_training.dat'.format(dirName, samplingType)
-	crossValidation = '{}{}_cross_validation.dat'.format(dirName, samplingType)
 	testing = '{}{}_testing.dat'.format(dirName, samplingType)
-	return training, crossValidation, testing 
+	return training, testing 
 
 
-def storeProcessedData(data, samplingType):
+def storeProcessedData(data, samplingType, level):
 	"""
 	Stores the preprocessed data.
 	It divides in to training(0.70 of data),
-	cross validation (20\% of data) and 
-	testing (10\% of the data), and stores
+	and testing (30\% of the data), and stores
 	it in three different files for each split.
 	Parameters:
 			data -> data to be stored
@@ -135,20 +133,37 @@ def storeProcessedData(data, samplingType):
 	# and testing with the ratios 0.70, 0.20, 0.10 of the 
 	# total 
 	trainingSize = (7 * total)/10
-	crossValidationSize = (2 * total)/10
+	# This value is going to be used as normalizer.
+	maxExchangeRateValue = max(float(x[2]) for x in data)
 	trainingSet = data[:trainingSize]
-	crossValidationSet = data[trainingSize:(trainingSize+crossValidationSize)]
-	testingSet = data[(trainingSize+crossValidationSize):]
+	# Normalizing hourly data
+	trainingSet = normalize(\
+		trainingSet,
+		maxExchangeRateValue
+	)
+
+	# Denoising daily data
+	trainingSet = denoiseOutputData(\
+		trainingSet, level
+	)
+
+	testingSet = data[trainingSize:]
+	testingSet = normalize(\
+		testingSet,
+		maxExchangeRateValue
+	)
+
+	testingSet = denoiseOutputData(\
+		testingSet, level
+	)
 
 	# Getting the names of the destination file.
-	trainLoc, cVLoc, testLoc = processedFileNamesLocations(samplingType)
+	trainLoc, testLoc = processedFileNamesLocations(samplingType)
 	trainingSet = [" ".join(x) for x in trainingSet]
-	crossValidationSet = [" ".join(x) for x in crossValidationSet]
 	testingSet = [" ".join(x) for x in testingSet]
 	
 	# Saving the split files.
 	utl.saveFileAtLocation(trainingSet, trainLoc)
-	utl.saveFileAtLocation(crossValidationSet, cVLoc)
 	utl.saveFileAtLocation(testingSet, testLoc)
 
 def normalize(data, xMax):
@@ -197,10 +212,7 @@ if __name__ == "__main__":
 	wholeData = []
 	wholeData.extend(dataFirstHalf)
 	wholeData.extend(dataSecondHalf)
-	# This value is going to be used as normalizer.
-	maxExchangeRateValue = max(float(x.split()[2]) for x in wholeData)
 	
-
 	# Sampling at closing day and hourly.
 	# For the hourly sampling an average for hour is calculated.
 	atClosingDaySampledData = getClosingDaySamples(wholeData)
@@ -212,39 +224,39 @@ if __name__ == "__main__":
 		hourlySampledData
 	)
 
-	# Normalizing daily data
-	atClosingDaySampledDataNormalized = normalize(\
-		atClosingDaySampledData,
-		maxExchangeRateValue
-	)
+	# # Normalizing daily data
+	# atClosingDaySampledDataNormalized = normalize(\
+	# 	atClosingDaySampledData,
+	# 	maxExchangeRateValue
+	# )
 
-	# Normalizing hourly data
-	hourlySampledDataNormalized = normalize(\
-		hourlySampledData,
-		maxExchangeRateValue
-	)
+	# # Normalizing hourly data
+	# hourlySampledDataNormalized = normalize(\
+	# 	hourlySampledData,
+	# 	maxExchangeRateValue
+	# )
 
-	# Denoising daily data
-	atClosingDaySampledDataDenoised = denoiseOutputData(\
-		atClosingDaySampledDataNormalized, 2
-	)
+	# # Denoising daily data
+	# atClosingDaySampledDataDenoised = denoiseOutputData(\
+	# 	atClosingDaySampledDataNormalized, 2
+	# )
 
-	# Denoising hourly data
-	hourlySampledDataDenoised = denoiseOutputData(\
-		hourlySampledDataNormalized, 3
-	)
+	# # Denoising hourly data
+	# hourlySampledDataDenoised = denoiseOutputData(\
+	# 	hourlySampledDataNormalized, 3
+	# )
 
 
 	# Plotting the normalized and denoised time series after sampling
-	plotTimeSeries(\
-		atClosingDaySampledDataDenoised,
-		hourlySampledDataDenoised,
-		"Normalized and Denoised"
-	)
+	# plotTimeSeries(\
+	# 	atClosingDaySampledDataDenoised,
+	# 	hourlySampledDataDenoised,
+	# 	"Normalized and Denoised"
+	# )
 
 	# Storing processed data
-	storeProcessedData(atClosingDaySampledDataDenoised, 'at_closing_day')
-	storeProcessedData(hourlySampledDataDenoised, 'hourly')
+	storeProcessedData(atClosingDaySampledData, 'at_closing_day', 2)
+	storeProcessedData(hourlySampledData, 'hourly', 3)
 	
 	
 
