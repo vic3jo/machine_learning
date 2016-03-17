@@ -4,6 +4,7 @@ Description: This file preprocessed data for the breast cancer problem.
 """
 
 import sys, os, csv
+import numpy as np
 from random import shuffle
 
 # Adding reference to the scripts folder
@@ -35,8 +36,19 @@ if __name__ == "__main__":
 	# Two third of the total used for the training set
 	trainingSize = (2 * total)/3 
 	trainingSet = rows[:trainingSize]
-	testingSet = rows[trainingSize:]
+	trainingSet = np.array(trainingSet).astype(float)
+	
 
+	
+	trainingSet[:, :9] = utl.normalize(trainingSet[:, :9], 1, 10)
+	trainingSet[:, 9:] = (trainingSet[:, 9:] - 2)/2
+
+	testingSet = rows[trainingSize:]
+	testingSet = np.array(testingSet).astype(float)
+	testingSet[:, :9] = utl.normalize(testingSet[:, :9], 1, 10)
+	testingSet[:, 9:] = (testingSet[:, 9:] - 2)/2
+
+	
 	# Saving training data set
 	utl.writeCSVFile(\
 		trainingSet,

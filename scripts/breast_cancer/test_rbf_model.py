@@ -10,14 +10,13 @@ from collections import Counter
 
 
 if __name__ == "__main__":
-	print ("Reading Testing Data")
+	print ("Reading Testing Data RBF Model (Cancer Problem)")
 	# Reading testing data
 	testingData = utl.readDataSetAsMatrix(utl.BREAST_CANCER_TESTING_FILE, 1, ',')
 
-	inputs = utl.normalize(testingData[:, :9], 1, 10)
+	inputs = testingData[:, :9]
 	outputs = testingData[:, 9:]
-	# Remapping outputs
-	outputs = (outputs - 2) / 2
+	
 	neuralNetwork = utl.readModelFromLocation(\
 		utl.BREAST_CANCER_RBF_MODEL_FILE
 	)
@@ -33,6 +32,7 @@ if __name__ == "__main__":
 		predictions,
 		outputs
 	)
+	print("Evaluation for RBF Model (cancer problem)")
 	print("Classification Rate = {}".format(classificationRate))
 
 	mapper = lambda x: (int(x[0]), int(x[1]))

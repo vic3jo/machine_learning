@@ -9,18 +9,15 @@ sys.path.append(currentFileDir + '/../')
 import utilities as utl
 
 def trainModel(unitsInHiddenLayer = 9):
-	print ("Reading Training Data")
+	print ("Reading Training Data (Cancer Problem)")
 	# Reading Training data
 	trainData = utl.readDataSetAsMatrix(utl.BREAST_CANCER_TRAINING_FILE, 1, ',')
 
 	# Separating outputs from inputs
-	inputs = utl.normalize(trainData[:, :9], 1, 10)
+	inputs = trainData[:, :9]
 	outputs = trainData[:, 9:]
-
-	# Remapping outputs
-	outputs = (outputs - 2)/2
 	
-	print("Training RBF Model")
+	print("Training RBF Model (Cancer problem)")
 	return utl.trainNetwork(\
 		inputs,
 		outputs,
@@ -36,7 +33,7 @@ if __name__ == "__main__":
 
 	model = trainModel(5)
 
-	print ("Saving Trained Model")
+	print ("Saving RBF Trained Model (Cancer Problem)")
 	utl.saveModelAtLocation(\
 		model,
 		utl.BREAST_CANCER_RBF_MODEL_FILE
