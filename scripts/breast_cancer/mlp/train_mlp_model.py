@@ -1,7 +1,7 @@
 import sys, os
 # Adding reference to the scripts folder
 currentFileDir = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(currentFileDir + '/../')
+sys.path.append(currentFileDir + '/../../')
 
 import utilities as utl
 
@@ -16,7 +16,7 @@ def trainModel(unitsInHiddenLayer = 8):
 
 
 	print("Training MLP Model for the cancer problem")
-	return utl.trainNetwork(\
+	return utl.trainMLPNetwork(\
 		inputs,
 		outputs,
 		unitsInHiddenLayer = unitsInHiddenLayer

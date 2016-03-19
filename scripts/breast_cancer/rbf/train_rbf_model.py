@@ -4,7 +4,7 @@ from pybrain.structure import LinearLayer
 from pybrain.structure import GaussianLayer
 # Adding reference to the scripts folder
 currentFileDir = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(currentFileDir + '/../')
+sys.path.append(currentFileDir + '/../../')
 
 import utilities as utl
 
@@ -18,20 +18,17 @@ def trainModel(unitsInHiddenLayer = 9):
 	outputs = trainData[:, 9:]
 	
 	print("Training RBF Model (Cancer problem)")
-	return utl.trainNetwork(\
+	return utl.trainRBFNetwork(\
 		inputs,
 		outputs,
-		unitsInHiddenLayer = unitsInHiddenLayer,
-		builder = utl.RBF_CLASSIFIER_BUILDER,
-		learningrate = 0.001,
-		epochs = 100
+		unitsInHiddenLayer = unitsInHiddenLayer
 	)
 
 
 
 if __name__ == "__main__":
 
-	model = trainModel(5)
+	model = trainModel(2)
 
 	print ("Saving RBF Trained Model (Cancer Problem)")
 	utl.saveModelAtLocation(\

@@ -12,6 +12,9 @@ from pybrain.structure import GaussianLayer
 from pybrain.structure import FeedForwardNetwork
 from pybrain.tools.shortcuts import buildNetwork
 from pybrain.structure import FullConnection
+from pybrain.auxiliary import kmeans
+from pybrain.structure.modules.neuronlayer import NeuronLayer
+
 import numpy as np
 from collections import namedtuple
 import matplotlib.pyplot as plt
@@ -60,43 +63,9 @@ class SimpleMLPWithLinearLayerNetworkBuilder(object):
 			hiddenclass = SigmoidLayer
 		)
 
-
-class RBFClassifierNetworkBuilder(object):
-	"""RBFClassifierNetworkBuilder"""
-	def __init__(self):
-		super(RBFClassifierNetworkBuilder, self).__init__()
-	
-
-	def build(self,
-		numberOfFeatures,
-		outputSize,
-		unitsInHiddenLayer = 2
-	):
-		neuralNetwork = FeedForwardNetwork()
-		inputLayer = LinearLayer(numberOfFeatures)
-		hiddenLayer = GaussianLayer(unitsInHiddenLayer)
-		outputLayer = SigmoidLayer(outputSize)
-		neuralNetwork.addInputModule(inputLayer)
-		neuralNetwork.addModule(hiddenLayer)
-		neuralNetwork.addOutputModule(outputLayer)
-
-		inputToHiddenLayerConnection = FullConnection(\
-			inputLayer,
-			hiddenLayer
-		)
-		hiddenLayerToOuputConnection = FullConnection(\
-			hiddenLayer,
-			outputLayer
-		)
-		neuralNetwork.addConnection(inputToHiddenLayerConnection)
-		neuralNetwork.addConnection(hiddenLayerToOuputConnection)
-		neuralNetwork.sortModules()
-		return neuralNetwork
-
-
 MLP_BUILDER = SimpleMLPNetworkBuilder()
 MLP_LINEAR_BUILDER =  SimpleMLPWithLinearLayerNetworkBuilder()
-RBF_CLASSIFIER_BUILDER = RBFClassifierNetworkBuilder()
+
 
 
 def readFileIgnoringLinesForCondition(fileLocation, shouldBeIgnored):
@@ -196,13 +165,123 @@ def __createSupervisedDataSet(inputs, outputs):
 
 
 
-def trainNetwork(\
+def buildSimpleNetwork(
+		numberOfFeatures,
+		outputSize,
+		outLayerClass
+):
+	neuralNetwork = FeedForwardNetwork()
+	inputLayer = LinearLayer(numberOfFeatures)
+	
+	outputLayer = outLayerClass(outputSize)
+	neuralNetwork.addInputModule(inputLayer)
+	neuralNetwork.addOutputModule(outputLayer)
+
+	inputLayerToOuputConnection = FullConnection(\
+		inputLayer,
+		outputLayer
+	)
+
+	neuralNetwork.addConnection(inputLayerToOuputConnection)
+	neuralNetwork.sortModules()
+	return neuralNetwork
+
+
+class RBFNetwork(object):
+	"""docstring for RBFNetwork"""
+	def __init__(self, centers, variances, network):
+		super(RBFNetwork, self).__init__()
+		self.centers = centers
+		self.variances = variances
+		self.network = network
+
+	def activate(self, inputValue):
+		return self.network.activate(\
+			allDistances(inputValue, self.centers, self.variances)
+		)		
+
+def g(x, xi, variance):
+	v = (x - xi)
+	vs = v.dot(v.T)
+	return np.exp(vs/variance)
+
+def allDistances(x, centers, variances):
+	rows, cols = centers.shape
+	result = np.zeros(rows)
+	for i in range(rows):
+		result[i] = g(x, centers[i], variances[i])
+	return result
+
+def trainRBFNetwork(\
 	inputs,
 	outputs,
 	unitsInHiddenLayer = 2,
-	builder = MLP_BUILDER,
+	maxEpochs = 100,
+	closestNeighbor = False,
+	outputLayer = SigmoidLayer
+):
+	rows, numberOfFeatures = inputs.shape
+	rows, outputSize = outputs.shape
+
+	print("Clustering started")
+	centers, assignment =  kmeans.kmeanspp(\
+		inputs,
+		unitsInHiddenLayer
+	)
+	print("Clustering Ended")
+	variances = np.zeros(centers.shape[0])
+
+	for i in range(centers.shape[0]):
+		minimum = float("inf")
+		distances = [\
+			np.linalg.norm(centers[i]-centers[j])**2
+			for j in range(centers.shape[0]) 
+			if j != i
+		]
+		if closestNeighbor:
+			variances[i] = np.min(distances)
+		else:	
+			variances[i] = sum(distances)/len(distances)
+
+	
+	mappedInpus = np.apply_along_axis(\
+		lambda x: allDistances(x, centers, variances),
+		1,
+		inputs
+	)
+
+	dataset = __createSupervisedDataSet(\
+		mappedInpus,
+		outputs
+	)
+
+	neuralNetwork = buildSimpleNetwork(\
+		unitsInHiddenLayer,
+		outputSize, 
+		outputLayer
+	)
+
+	
+	
+	trainer = BackpropTrainer(\
+		neuralNetwork,
+		dataset
+	)
+
+	trainer.trainUntilConvergence(maxEpochs = maxEpochs)
+	return RBFNetwork(centers, variances, neuralNetwork)
+
+
+
+
+
+def trainMLPNetwork(\
+	inputs,
+	outputs,
+	unitsInHiddenLayer = 2,
 	momentum = 0.1,
 	epochs = 100,
+	builder = MLP_BUILDER,
 	learningrate= 0.01
 ):
 	rows, numberOfFeatures = inputs.shape
@@ -224,8 +303,11 @@ def trainNetwork(\
 		momentum = momentum,
 		learningrate= 0.01
 	)
-	trainer.trainEpochs(epochs)
+	trainer.trainUntilConvergence(maxEpochs = epochs)
 	return neuralNetwork
+
+
+
 
 def readDataSetAsMatrix(\
 	path,
