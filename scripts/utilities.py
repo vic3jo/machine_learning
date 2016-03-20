@@ -3,7 +3,7 @@ Authors: Swati Bhartiya, Victor Trejo, and Utkarsh Bali
 Description: This file contains information used through out the project.
 """
 
-import csv, os, pickle
+import csv, os, pickle,  time, psutil
 from pybrain.datasets import SupervisedDataSet
 from pybrain.supervised.trainers import BackpropTrainer, RPropMinusTrainer
 from pybrain.structure import SigmoidLayer
@@ -263,32 +263,31 @@ def trainRBFNetwork(\
 	# 	maxEpochs = trainProcessConfiguration.maxEpochs
 	# )
 
-	network = earlyStopTraining(
+	network, errorsByEpoch = earlyStopTraining(
 		crossValSet,
 		neuralNetwork, 
 		trainProcessConfiguration,
 		trainer
 	)
-	return RBFNetwork(centers, variances, network)
+	return RBFNetwork(centers, variances, network), errorsByEpoch
 
 
 def earlyStopTraining(crossValSet, neuralNetwork, configuration, trainer):
 	# Training with early stop	
 	previousStageError = float("inf")
 	previousNetwork = neuralNetwork.copy()
-
+	errorsByEpoch = []
 	for epoch in range(1, configuration.maxEpochs + 1):
 		predictions = neuralNetwork.activateOnDataset(crossValSet)
 		# TODO: VERIFY
 		if epoch % 5 == 0:
-			error =  Validator.ESS(predictions, crossValSet['target'])
-			if error > previousStageError: break
-			previousStageError = error
+			validationError =  Validator.ESS(predictions, crossValSet['target'])
+			if validationError > previousStageError: break
+			previousStageError = validationError
 			previousNetwork = neuralNetwork.copy()
-			
-		trainer.train()
-
-	return previousNetwork
+		trainingError = trainer.train()
+		errorsByEpoch.append(trainingError)
+	return previousNetwork, errorsByEpoch
 
 def trainMLPNetwork(\
 	inputs,
@@ -443,7 +442,8 @@ def evaluateClassificationModel(model, inputs, outputs, label = '', debug = True
 		outputs
 	)
 
-	print("Classification Rate = {}".format(classificationRate))
+
+	
 
 	mapper = lambda x: (int(x[0]), int(x[1]))
 	confusionMatrix  = Counter([\
@@ -451,14 +451,37 @@ def evaluateClassificationModel(model, inputs, outputs, label = '', debug = True
 		for c in zip(predictions, outputs)  
 	])
 
-	print("True Positives  = {}".format( confusionMatrix['(1, 1)'] ))
-	print("False Positives = {}".format( confusionMatrix['(1, 0)'] ))
-	print("False Negatives = {}".format( confusionMatrix['(0, 1)'] ))
-	print("True Negatives = {}".format( confusionMatrix['(0, 0)'] ))
+	if debug:
+		print("Classification Rate = {}".format(classificationRate))
+		print("True Positives  = {}".format( confusionMatrix['(1, 1)'] ))
+		print("False Positives = {}".format( confusionMatrix['(1, 0)'] ))
+		print("False Negatives = {}".format( confusionMatrix['(0, 1)'] ))
+		print("True Negatives = {}".format( confusionMatrix['(0, 0)'] ))
+
+	return classificationRate
 
 
+def measureRunningTime(operation):
+	"""
+	Measures the time that takes an operation
+	"""
+	start = time.time()
+	result = operation()
+	end = time.time()
+	timeTaken = end - start
+	return result, timeTaken
 
 
+def getMemoryUsage():
+	"""
+	Gets the memory usage of the script file.
+	Returns:  the memory usage value in MB.
+	"""
+	currentProcess = psutil.Process(os.getpid())
+	# To convert the data to MB
+	MBNormalizer = float(2 ** 20)
+	memoryInfo =  currentProcess.get_memory_info()[0]
+	return memoryInfo/MBNormalizer
 
 
 

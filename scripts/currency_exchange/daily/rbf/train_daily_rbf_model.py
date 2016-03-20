@@ -31,12 +31,10 @@ def trainModel():
 		configuration
 	)
 
-	return neuralNetwork
-
 
 if __name__ == "__main__":
 
-	model = trainModel()
+	model, errorsByEpoch = trainModel()
 
 	print("Saving RBF Trained Model (Currency Exchange problem)")
 	utl.saveModelAtLocation(

@@ -25,18 +25,16 @@ def trainModel(unitsInHiddenLayer = 8):
 	configuration.maxEpochs = 1000
 	configuration.learningrate = 0.0001
 	
-	neuralNetwork = utl.trainMLPNetwork(\
+	return utl.trainMLPNetwork(\
 		inputs,
 		outputs,
 		configuration
 	)
 
-	return neuralNetwork
-
 
 if __name__ == "__main__":
 
-	model = trainModel(4)
+	model, errorsByEpoch = trainModel(4)
 
 	print("Saving MLP Trained Model (Currency Exchange problem)")
 	utl.saveModelAtLocation(

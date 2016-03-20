@@ -5,8 +5,9 @@ sys.path.append(currentFileDir + '/../../')
 
 import utilities as utl
 
-def trainModel(unitsInHiddenLayer = 8):
-	print ("Reading Training Data for the cancer problem")
+def trainModel(unitsInHiddenLayer = 8, debug = True):
+	if debug:
+		print ("Reading Training Data for the cancer problem")
 	# Reading Training data
 	trainData = utl.readDataSetAsMatrix(utl.BREAST_CANCER_TRAINING_FILE, 1, ',')
 
@@ -14,8 +15,9 @@ def trainModel(unitsInHiddenLayer = 8):
 	inputs = trainData[:, :9]
 	outputs = trainData[:, 9:]
 
+	if debug:
+		print("Training MLP Model for the cancer problem")
 
-	print("Training MLP Model for the cancer problem")
 	configuration = utl.MLPTrainProcessConfiguration()
 	configuration.unitsInHiddenLayer = unitsInHiddenLayer
 	return utl.trainMLPNetwork(\
@@ -28,8 +30,8 @@ def trainModel(unitsInHiddenLayer = 8):
 
 if __name__ == "__main__":
 
-	model = trainModel()
-
+	model, errorsByEpoch = trainModel()
+	
 	print ("Saving MLP Trained Model for the cancer problem")
 	utl.saveModelAtLocation(\
 		model,
