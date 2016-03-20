@@ -19,13 +19,16 @@ def trainModel(unitsInHiddenLayer = 8):
 	inputs = utl.createPattern(trainData[:-1, 2:], width)
 	outputs = trainData[(width+1):, 2:].astype(np.float64)
 	
+
 	print("Training Model RBF Model (Currency Exchange problem)")
 	return utl.trainRBFNetwork(\
 		inputs,
 		outputs,
+		# clustering = False,
 		unitsInHiddenLayer = unitsInHiddenLayer,
-		# outputLayer = LinearLayer,
-		# closestNeighbor = True
+		outputLayer = LinearLayer,
+		maxEpochs = 2,
+		# variance = 1.0,
 	)
 
 	return neuralNetwork
@@ -33,7 +36,7 @@ def trainModel(unitsInHiddenLayer = 8):
 
 if __name__ == "__main__":
 
-	model = trainModel(20)
+	model = trainModel(10)
 
 	print("Saving RBF Trained Model (Currency Exchange problem)")
 	utl.saveModelAtLocation(

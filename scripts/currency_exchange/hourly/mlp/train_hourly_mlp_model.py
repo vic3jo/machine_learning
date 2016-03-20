@@ -25,7 +25,7 @@ def trainModel(unitsInHiddenLayer = 8):
 		unitsInHiddenLayer = unitsInHiddenLayer,
 		builder = utl.MLP_LINEAR_BUILDER,
 		epochs = 100,
-		learningrate = 0.001
+		learningrate = 0.01
 	)
 
 	return neuralNetwork
@@ -33,7 +33,7 @@ def trainModel(unitsInHiddenLayer = 8):
 
 if __name__ == "__main__":
 
-	model = trainModel(4)
+	model = trainModel(8)
 
 	print("Saving MLP Trained Model (Currency Exchange problem)")
 	utl.saveModelAtLocation(

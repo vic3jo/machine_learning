@@ -5,7 +5,7 @@ Description: This file contains information used through out the project.
 
 import csv, os, pickle
 from pybrain.datasets import SupervisedDataSet
-from pybrain.supervised.trainers import BackpropTrainer
+from pybrain.supervised.trainers import BackpropTrainer, RPropMinusTrainer
 from pybrain.structure import SigmoidLayer
 from pybrain.structure import LinearLayer
 from pybrain.structure import GaussianLayer
@@ -202,7 +202,7 @@ class RBFNetwork(object):
 
 def g(x, xi, variance):
 	v = (x - xi)
-	vs = v.dot(v.T)
+	vs = np.linalg.norm(x - xi)**2
 	return np.exp(vs/variance)
 
 def allDistances(x, centers, variances):
@@ -217,31 +217,38 @@ def trainRBFNetwork(\
 	outputs,
 	unitsInHiddenLayer = 2,
 	maxEpochs = 100,
+	clustering = True,
 	closestNeighbor = False,
-	outputLayer = SigmoidLayer
+	outputLayer = SigmoidLayer,
+	variance = 1.0
 ):
 	rows, numberOfFeatures = inputs.shape
 	rows, outputSize = outputs.shape
 
-	print("Clustering started")
-	centers, assignment =  kmeans.kmeanspp(\
-		inputs,
-		unitsInHiddenLayer
-	)
-	print("Clustering Ended")
-	variances = np.zeros(centers.shape[0])
+	if clustering:
+		print("Clustering started")
+		centers, assignment =  kmeans.kmeanspp(\
+			inputs,
+			unitsInHiddenLayer
+		)
+		print("Clustering Ended")
+		variances = np.zeros(centers.shape[0])
 
-	for i in range(centers.shape[0]):
-		minimum = float("inf")
-		distances = [\
-			np.linalg.norm(centers[i]-centers[j])**2
-			for j in range(centers.shape[0]) 
-			if j != i
-		]
-		if closestNeighbor:
-			variances[i] = np.min(distances)
-		else:	
-			variances[i] = sum(distances)/len(distances)
+		for i in range(centers.shape[0]):
+			minimum = float("inf")
+			distances = [\
+				np.linalg.norm(centers[i]-centers[j])**2
+				for j in range(centers.shape[0]) 
+				if j != i
+			]
+			if closestNeighbor:
+				variances[i] = np.min(distances)
+			else:	
+				variances[i] = sum(distances)/len(distances)
+	else:
+		centers = inputs.copy()
+		variances = np.ones(centers.shape[0]) * variance
+		unitsInHiddenLayer = centers.shape[0]
 
 	
 	mappedInpus = np.apply_along_axis(\
