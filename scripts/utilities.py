@@ -270,9 +270,9 @@ def trainRBFNetwork(\
 
 	
 	
-	trainer = BackpropTrainer(\
+	trainer = RPropMinusTrainer(\
 		neuralNetwork,
-		dataset
+		dataset=dataset
 	)
 
 	trainer.trainUntilConvergence(maxEpochs = maxEpochs)

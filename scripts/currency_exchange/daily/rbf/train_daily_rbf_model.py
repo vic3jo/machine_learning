@@ -25,7 +25,8 @@ def trainModel():
 		inputs,
 		outputs,
 		outputLayer = LinearLayer,
-		clustering = False
+		clustering = False,
+		maxEpochs = 1000
 	)
 
 	return neuralNetwork

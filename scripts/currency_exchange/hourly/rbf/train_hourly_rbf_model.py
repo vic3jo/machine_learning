@@ -24,10 +24,10 @@ def trainModel(unitsInHiddenLayer = 8):
 	return utl.trainRBFNetwork(\
 		inputs,
 		outputs,
-		# clustering = False,
+		clustering = False,
 		unitsInHiddenLayer = unitsInHiddenLayer,
 		outputLayer = LinearLayer,
-		maxEpochs = 2,
+		maxEpochs = 100,
 		# variance = 1.0,
 	)
 
