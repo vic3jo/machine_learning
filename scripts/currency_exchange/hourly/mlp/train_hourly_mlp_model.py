@@ -23,6 +23,9 @@ def trainModel(unitsInHiddenLayer = 8):
 	configuration = utl.MLPTrainProcessConfiguration()
 	configuration.unitsInHiddenLayer = unitsInHiddenLayer
 	configuration.outputLayer = LinearLayer
+	configuration.maxEpochs = 1000
+	configuration.learningrate = 0.001
+	
 	neuralNetwork = utl.trainMLPNetwork(\
 		inputs,
 		outputs,

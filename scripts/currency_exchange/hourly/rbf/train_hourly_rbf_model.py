@@ -24,7 +24,7 @@ def trainModel():
 	configuration = utl.RBFTrainProcessConfiguration()
 	configuration.outputLayer = LinearLayer
 	configuration.performClustering = False
-	configuration.maxEpochs = 100
+	configuration.maxEpochs = 1000
 	configuration.learningrate = 0.001
 
 	return utl.trainRBFNetwork(\

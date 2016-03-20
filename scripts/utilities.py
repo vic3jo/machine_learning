@@ -16,8 +16,6 @@ from pybrain.auxiliary import kmeans
 from pybrain.structure.modules.neuronlayer import NeuronLayer
 from pybrain.tools.validation import Validator
 from collections import Counter
-
-
 import numpy as np
 from collections import namedtuple
 import matplotlib.pyplot as plt
@@ -254,20 +252,43 @@ def trainRBFNetwork(\
 		trainProcessConfiguration.outputLayer
 	)
 
-	
+	trainSet, crossValSet = dataset.splitWithProportion( 0.75 )
 	
 	trainer = trainProcessConfiguration.trainer(\
 		neuralNetwork,
-		dataset = dataset
+		dataset = trainSet
 	)
 
-	trainer.trainUntilConvergence(\
-		maxEpochs = trainProcessConfiguration.maxEpochs
+	# trainer.trainUntilConvergence(\
+	# 	maxEpochs = trainProcessConfiguration.maxEpochs
+	# )
+
+	network = earlyStopTraining(
+		crossValSet,
+		neuralNetwork, 
+		trainProcessConfiguration,
+		trainer
 	)
-	return RBFNetwork(centers, variances, neuralNetwork)
+	return RBFNetwork(centers, variances, network)
 
 
+def earlyStopTraining(crossValSet, neuralNetwork, configuration, trainer):
+	# Training with early stop	
+	previousStageError = float("inf")
+	previousNetwork = neuralNetwork.copy()
 
+	for epoch in range(1, configuration.maxEpochs + 1):
+		predictions = neuralNetwork.activateOnDataset(crossValSet)
+		# TODO: VERIFY
+		if epoch % 5 == 0:
+			error =  Validator.ESS(predictions, crossValSet['target'])
+			if error > previousStageError: break
+			previousStageError = error
+			previousNetwork = neuralNetwork.copy()
+			
+		trainer.train()
+
+	return previousNetwork
 
 def trainMLPNetwork(\
 	inputs,
@@ -291,17 +312,21 @@ def trainMLPNetwork(\
 		outputs
 	)
 	
+	trainSet, crossValSet = dataset.splitWithProportion( 0.75 )
+
 	trainer = BackpropTrainer(\
 		neuralNetwork,
-		dataset,
+		trainSet,
 		momentum = trainingConfiguration.momentum,
 		learningrate = trainingConfiguration.learningrate
 	)
 
-	trainer.trainUntilConvergence(\
-		maxEpochs = trainingConfiguration.maxEpochs
+	return earlyStopTraining(
+		crossValSet,
+		neuralNetwork, 
+		trainingConfiguration,
+		trainer
 	)
-	return neuralNetwork
 
 
 
@@ -430,6 +455,14 @@ def evaluateClassificationModel(model, inputs, outputs, label = '', debug = True
 	print("False Positives = {}".format( confusionMatrix['(1, 0)'] ))
 	print("False Negatives = {}".format( confusionMatrix['(0, 1)'] ))
 	print("True Negatives = {}".format( confusionMatrix['(0, 0)'] ))
+
+
+
+
+
+
+
+
 
 
 
