@@ -44,4 +44,4 @@ if __name__ == "__main__":
 
 
 	utl.plotTimeSeries(outputs, predictions)
-	print Validator.MSE(predictions, outputs)
+	print("MSE = {}".format(Validator.MSE(predictions, outputs)))

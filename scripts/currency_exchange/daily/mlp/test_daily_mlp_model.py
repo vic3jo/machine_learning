@@ -18,6 +18,7 @@ if __name__ == "__main__":
 	width = utl.DAILY_WIDTH
 	inputs = utl.createPattern(testingData[:-1, 2:], width)
 	outputs = testingData[(width+1):, 2:]
+	
 	neuralNetwork = utl.readModelFromLocation(\
 		utl.CURRENCY_EXCHANGE_MLP_MODEL_FILE(\
 			utl.SAMPLING_TYPE.AT_CLOSING_DAY
@@ -42,4 +43,4 @@ if __name__ == "__main__":
 	])
 
 	utl.plotTimeSeries(outputs, predictions)
-	print Validator.MSE(predictions, outputs)
+	print("MSE = {}".format(Validator.MSE(predictions, outputs)))
