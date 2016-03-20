@@ -14,6 +14,9 @@ from pybrain.tools.shortcuts import buildNetwork
 from pybrain.structure import FullConnection
 from pybrain.auxiliary import kmeans
 from pybrain.structure.modules.neuronlayer import NeuronLayer
+from pybrain.tools.validation import Validator
+from collections import Counter
+
 
 import numpy as np
 from collections import namedtuple
@@ -347,6 +350,89 @@ def plotTimeSeries(real, predicted, extraTitle=""):
 	plt.title("predicted {}".format(extraTitle))
 	plt.plot(predicted)
 	plt.show()
+
+
+def customPrint(content, turnedOn = True):
+	if turnedOn:
+		print(content)
+
+def evaluateRegressionModel(model, inputs, outputs, label = '', debug = True):
+	
+	customPrint(\
+		"Reading Training Data ({})".format(label),
+		debug
+	)
+
+	customPrint(
+		"Evaluation for ({})".format(label),
+		debug
+	)
+
+	rows, numberOfFeatures = inputs.shape
+	for r in xrange(rows):
+		customPrint(\
+			"True Value = {},  Predicted Value {}".format(\
+				outputs[r],
+				model.activate(inputs[r])
+			),
+			debug
+		)
+
+
+	predictions = np.array([\
+		model.activate( inputs[r] ) 
+		for r in range(rows)
+	])
+
+	if debug:
+		plotTimeSeries(outputs, predictions)
+	
+	MSE = Validator.MSE(predictions, outputs)
+	
+	customPrint("MSE = {}".format(MSE), debug)
+	return MSE
+
+
+
+def evaluateClassificationModel(model, inputs, outputs, label = '', debug = True):
+	
+	customPrint(\
+		"Reading Training Data ({})".format(label),
+		debug
+	)
+
+	customPrint(
+		"Evaluation for ({})".format(label),
+		debug
+	)
+
+	rows, numberOfFeatures = inputs.shape
+
+	predictions = np.array([\
+		np.round( model.activate( inputs[r] ) )
+		for r in range(rows)
+	])
+
+	classificationRate =  Validator.classificationPerformance(\
+		predictions,
+		outputs
+	)
+
+	print("Classification Rate = {}".format(classificationRate))
+
+	mapper = lambda x: (int(x[0]), int(x[1]))
+	confusionMatrix  = Counter([\
+		str( mapper(c) )
+		for c in zip(predictions, outputs)  
+	])
+
+	print("True Positives  = {}".format( confusionMatrix['(1, 1)'] ))
+	print("False Positives = {}".format( confusionMatrix['(1, 0)'] ))
+	print("False Negatives = {}".format( confusionMatrix['(0, 1)'] ))
+	print("True Negatives = {}".format( confusionMatrix['(0, 0)'] ))
+
+
+
 
 
 
