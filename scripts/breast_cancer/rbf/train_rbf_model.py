@@ -18,10 +18,13 @@ def trainModel(unitsInHiddenLayer = 9):
 	outputs = trainData[:, 9:]
 	
 	print("Training RBF Model (Cancer problem)")
+	configuration = utl.RBFTrainProcessConfiguration()
+	configuration.unitsInHiddenLayer = unitsInHiddenLayer
+
 	return utl.trainRBFNetwork(\
 		inputs,
 		outputs,
-		unitsInHiddenLayer = unitsInHiddenLayer
+		configuration
 	)
 
 

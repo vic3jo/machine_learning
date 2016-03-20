@@ -16,10 +16,12 @@ def trainModel(unitsInHiddenLayer = 8):
 
 
 	print("Training MLP Model for the cancer problem")
+	configuration = utl.MLPTrainProcessConfiguration()
+	configuration.unitsInHiddenLayer = unitsInHiddenLayer
 	return utl.trainMLPNetwork(\
 		inputs,
 		outputs,
-		unitsInHiddenLayer = unitsInHiddenLayer
+		configuration
 	)
 
 

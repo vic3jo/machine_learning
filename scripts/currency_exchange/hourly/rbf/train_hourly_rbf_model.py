@@ -6,7 +6,7 @@ import utilities as utl
 import numpy as np
 from pybrain.structure import LinearLayer
 
-def trainModel(unitsInHiddenLayer = 8):
+def trainModel():
 	print("Reading Training Data RBF Model (Currency Exchange problem)")
 	# Reading Training data
 	trainData = utl.readDataSetAsMatrix(\
@@ -21,14 +21,16 @@ def trainModel(unitsInHiddenLayer = 8):
 	
 
 	print("Training Model RBF Model (Currency Exchange problem)")
+	configuration = utl.RBFTrainProcessConfiguration()
+	configuration.outputLayer = LinearLayer
+	configuration.performClustering = False
+	configuration.maxEpochs = 100
+	configuration.learningrate = 0.001
+
 	return utl.trainRBFNetwork(\
 		inputs,
 		outputs,
-		clustering = False,
-		unitsInHiddenLayer = unitsInHiddenLayer,
-		outputLayer = LinearLayer,
-		maxEpochs = 100,
-		# variance = 1.0,
+		configuration
 	)
 
 	return neuralNetwork
@@ -36,7 +38,7 @@ def trainModel(unitsInHiddenLayer = 8):
 
 if __name__ == "__main__":
 
-	model = trainModel(10)
+	model = trainModel()
 
 	print("Saving RBF Trained Model (Currency Exchange problem)")
 	utl.saveModelAtLocation(

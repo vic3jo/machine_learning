@@ -3,7 +3,7 @@ import sys, os
 currentFileDir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(currentFileDir + '/../../../')
 import utilities as utl
-
+from pybrain.structure import LinearLayer
 
 def trainModel(unitsInHiddenLayer = 8):
 	print("Reading Training Data MLP Model (Currency Exchange problem)")
@@ -19,13 +19,15 @@ def trainModel(unitsInHiddenLayer = 8):
 	outputs = trainData[(width+1):, 2:]
 	
 	print("Training Model MLP Model (Currency Exchange problem)")
+	configuration = utl.MLPTrainProcessConfiguration()
+	configuration.unitsInHiddenLayer = unitsInHiddenLayer
+	configuration.outputLayer = LinearLayer
+	configuration.maxEpochs = 1000
+	
 	neuralNetwork = utl.trainMLPNetwork(\
 		inputs,
 		outputs,
-		unitsInHiddenLayer = unitsInHiddenLayer,
-		builder = utl.MLP_LINEAR_BUILDER,
-		epochs = 1000,
-		learningrate = 0.01
+		configuration
 	)
 
 	return neuralNetwork

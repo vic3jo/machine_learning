@@ -23,48 +23,31 @@ currentFileDir = os.path.dirname(os.path.abspath(__file__))
 
 
 
-class SimpleMLPNetworkBuilder(object):
-	"""SimpleMLPNetworkBuilder"""
+class RBFTrainProcessConfiguration(object):
+	"""docstring for RBFTrainProcessConfiguration"""
 	def __init__(self):
-		super(SimpleMLPNetworkBuilder, self).__init__()
-	
-	def build(self,
-		numberOfFeatures,
-		outputSize,
-		unitsInHiddenLayer = 2
-	):
-		return buildNetwork(\
-			numberOfFeatures,
-			unitsInHiddenLayer,
-			outputSize,
-			bias = True,
-			outclass = SigmoidLayer,
-			hiddenclass = SigmoidLayer
-		)
+		super(RBFTrainProcessConfiguration, self).__init__()
+		self.unitsInHiddenLayer = 2
+		self.maxEpochs = 100
+		self.performClustering = True
+		self.useClosestNeighbor = False
+		self.outputLayer = SigmoidLayer
+		self.variance = 1.0
+		self.momentum = 0.9
+		self.learningrate = 0.01
+		self.trainer = RPropMinusTrainer
 
 
-
-class SimpleMLPWithLinearLayerNetworkBuilder(object):
-	"""SimpleMLPWithLinearLayerNetworkBuilder"""
+class MLPTrainProcessConfiguration(object):
+	"""docstring for MLPTrainProcessConfiguration"""
 	def __init__(self):
-		super(SimpleMLPWithLinearLayerNetworkBuilder, self).__init__()
-	
-	def build(self,
-		numberOfFeatures,
-		outputSize,
-		unitsInHiddenLayer = 2
-	):
-		return buildNetwork(\
-			numberOfFeatures,
-			unitsInHiddenLayer,
-			outputSize,
-			bias = True,
-			outclass = LinearLayer,
-			hiddenclass = SigmoidLayer
-		)
+		super(MLPTrainProcessConfiguration, self).__init__()
+		self.unitsInHiddenLayer = 2
+		self.maxEpochs = 100
+		self.outputLayer = SigmoidLayer
+		self.momentum = 0.9
+		self.learningrate = 0.01
 
-MLP_BUILDER = SimpleMLPNetworkBuilder()
-MLP_LINEAR_BUILDER =  SimpleMLPWithLinearLayerNetworkBuilder()
 
 
 
@@ -198,9 +181,10 @@ class RBFNetwork(object):
 	def activate(self, inputValue):
 		return self.network.activate(\
 			allDistances(inputValue, self.centers, self.variances)
-		)		
+		)
 
-def g(x, xi, variance):
+
+def gaussian(x, xi, variance):
 	v = (x - xi)
 	vs = np.linalg.norm(x - xi)**2
 	return np.exp(vs/variance)
@@ -209,31 +193,29 @@ def allDistances(x, centers, variances):
 	rows, cols = centers.shape
 	result = np.zeros(rows)
 	for i in range(rows):
-		result[i] = g(x, centers[i], variances[i])
+		result[i] = gaussian(x, centers[i], variances[i])
 	return result
+
+
+
+
 
 def trainRBFNetwork(\
 	inputs,
 	outputs,
-	unitsInHiddenLayer = 2,
-	maxEpochs = 100,
-	clustering = True,
-	closestNeighbor = False,
-	outputLayer = SigmoidLayer,
-	variance = 1.0
+	trainProcessConfiguration
 ):
 	rows, numberOfFeatures = inputs.shape
 	rows, outputSize = outputs.shape
 
-	if clustering:
-		print("Clustering started")
+	if trainProcessConfiguration.performClustering:
+		
 		centers, assignment =  kmeans.kmeanspp(\
 			inputs,
-			unitsInHiddenLayer
+			trainProcessConfiguration.unitsInHiddenLayer
 		)
-		print("Clustering Ended")
-		variances = np.zeros(centers.shape[0])
 
+		variances = np.zeros(centers.shape[0])
 		for i in range(centers.shape[0]):
 			minimum = float("inf")
 			distances = [\
@@ -241,14 +223,15 @@ def trainRBFNetwork(\
 				for j in range(centers.shape[0]) 
 				if j != i
 			]
-			if closestNeighbor:
+
+			if trainProcessConfiguration.useClosestNeighbor:
 				variances[i] = np.min(distances)
 			else:	
 				variances[i] = sum(distances)/len(distances)
 	else:
 		centers = inputs.copy()
-		variances = np.ones(centers.shape[0]) * variance
-		unitsInHiddenLayer = centers.shape[0]
+		variances = np.ones(centers.shape[0]) * trainProcessConfiguration.variance
+		trainProcessConfiguration.unitsInHiddenLayer = centers.shape[0]
 
 	
 	mappedInpus = np.apply_along_axis(\
@@ -263,21 +246,22 @@ def trainRBFNetwork(\
 	)
 
 	neuralNetwork = buildSimpleNetwork(\
-		unitsInHiddenLayer,
+		trainProcessConfiguration.unitsInHiddenLayer,
 		outputSize, 
-		outputLayer
+		trainProcessConfiguration.outputLayer
 	)
 
 	
 	
-	trainer = RPropMinusTrainer(\
+	trainer = trainProcessConfiguration.trainer(\
 		neuralNetwork,
-		dataset=dataset
+		dataset = dataset
 	)
 
-	trainer.trainUntilConvergence(maxEpochs = maxEpochs)
+	trainer.trainUntilConvergence(\
+		maxEpochs = trainProcessConfiguration.maxEpochs
+	)
 	return RBFNetwork(centers, variances, neuralNetwork)
-
 
 
 
@@ -285,20 +269,20 @@ def trainRBFNetwork(\
 def trainMLPNetwork(\
 	inputs,
 	outputs,
-	unitsInHiddenLayer = 2,
-	momentum = 0.1,
-	epochs = 100,
-	builder = MLP_BUILDER,
-	learningrate= 0.01
+	trainingConfiguration
 ):
 	rows, numberOfFeatures = inputs.shape
 	rows, outputSize = outputs.shape
 
-	neuralNetwork = builder.build(\
-		numberOfFeatures,
-		outputSize,
-		unitsInHiddenLayer
+	neuralNetwork = buildNetwork(\
+			numberOfFeatures,
+			trainingConfiguration.unitsInHiddenLayer,
+			outputSize,
+			bias = True,
+			outclass = trainingConfiguration.outputLayer,
+			hiddenclass = SigmoidLayer
 	)
+
 	dataset = __createSupervisedDataSet(\
 		inputs,
 		outputs
@@ -307,10 +291,13 @@ def trainMLPNetwork(\
 	trainer = BackpropTrainer(\
 		neuralNetwork,
 		dataset,
-		momentum = momentum,
-		learningrate= 0.01
+		momentum = trainingConfiguration.momentum,
+		learningrate = trainingConfiguration.learningrate
 	)
-	trainer.trainUntilConvergence(maxEpochs = epochs)
+
+	trainer.trainUntilConvergence(\
+		maxEpochs = trainingConfiguration.maxEpochs
+	)
 	return neuralNetwork
 
 

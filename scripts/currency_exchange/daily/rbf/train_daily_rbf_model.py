@@ -19,14 +19,16 @@ def trainModel():
 	inputs = utl.createPattern(trainData[:-1, 2:], width)
 	outputs = trainData[(width+1):, 2:].astype(np.float64)
 	
-
 	print("Training Model RBF Model (Currency Exchange problem)")
+	configuration = utl.RBFTrainProcessConfiguration()
+	configuration.outputLayer = LinearLayer
+	configuration.performClustering = False
+	configuration.maxEpochs = 1000 
+	
 	return utl.trainRBFNetwork(\
 		inputs,
 		outputs,
-		outputLayer = LinearLayer,
-		clustering = False,
-		maxEpochs = 1000
+		configuration
 	)
 
 	return neuralNetwork
