@@ -19,6 +19,7 @@ from collections import Counter
 import numpy as np
 from collections import namedtuple
 import matplotlib.pyplot as plt
+from memory_profiler import memory_usage
 
 currentFileDir = os.path.dirname(os.path.abspath(__file__))
 
@@ -485,9 +486,88 @@ def getMemoryUsage():
 
 
 
+class AverageClassifierStatistics(object):
+	"""Average Classifier Statistics"""
+	def __init__(\
+		self
+	):
+		super(AverageClassifierStatistics, self).__init__()
+		self.trainingTime = 0.0
+		self.testingTime = 0.0
+		self.classificationRate = 0.0
+		self.trainingMemory = 0.0
+		self.testingMemory = 0.0
+		self.trainingEpochs = 0
+	
+	def printValues(self):
+		print("\t\tAverage epochs taken to train {}".format(self.trainingEpochs))
+		print("\t\tAverage time taken training  = {} seconds".format(self.trainingTime))
+		print("\t\tAverage time taken testing  = {} seconds".format(self.testingTime))
+		print("\t\tAverage memory taken training  = {} MB".format(self.trainingMemory))
+		print("\t\tAverage memory taken testing  = {} MB".format(self.testingMemory))
+		print("\t\tAverage classification rate {}".format(self.classificationRate))
 
 
+def evaluateNeuralNetworkForDifferentHiddenLayerSizes(\
+	trainFunction,
+	testFunction,
+	hiddenLayerSizes,
+	numberOfTries = 5
+):
+	statistics = {\
+		n:AverageClassifierStatistics()
+		for n in hiddenLayerSizes
+	}
 
+	for unitsInHiddenLayer in hiddenLayerSizes:
+		print "\tEvaluation for number Of Units in Hidden Layer = {}".format(\
+			unitsInHiddenLayer
+		)
+
+		trainingTimes, testingTimes = [], []
+		trainingMemoryUsages, testingMemoryUsages = [], []
+		classificationRates, trainingEpochs = [], []
+		for i in range(numberOfTries):
+			trainingResult, trainingMLPModelTime = measureRunningTime(\
+				lambda : trainFunction(unitsInHiddenLayer, False)
+			)
+
+			model, errorsByEpoch = trainingResult
+			classificationRate, testingMLPModelTime = measureRunningTime(\
+				lambda : testFunction(model, debug = False)
+			)
+
+			
+			trainingMemoryUsages.append(\
+				max(memory_usage(lambda : trainFunction(unitsInHiddenLayer, False)))
+			) 
+
+			testingMemoryUsages.append(
+				max(memory_usage(lambda :  testFunction(model, debug = False)))
+			)
+
+			trainingTimes.append(trainingMLPModelTime)
+			testingTimes.append(testingMLPModelTime)
+			classificationRates.append(classificationRate)
+			trainingEpochs.append(len(errorsByEpoch))
+
+		statistics[unitsInHiddenLayer].trainingEpochs = sum(trainingEpochs)/len(trainingEpochs)
+		statistics[unitsInHiddenLayer].trainingTime = sum(trainingTimes)/len(trainingTimes)
+		statistics[unitsInHiddenLayer].testingTime = sum(testingTimes)/len(testingTimes)
+		statistics[unitsInHiddenLayer].trainingMemory = sum(trainingMemoryUsages)/len(trainingMemoryUsages)
+		statistics[unitsInHiddenLayer].testingMemory = sum(testingMemoryUsages)/len(testingMemoryUsages)
+		statistics[unitsInHiddenLayer].classificationRate = sum(classificationRates)/len(classificationRates)
+
+	return statistics
+
+
+def printStatistics(statistics):
+	for unitsInHiddenLayer in sorted(statistics.keys()):
+		print "\n\tNumber Of Units in Hidden Layer  = {}".format(\
+			unitsInHiddenLayer
+		)
+		print "\t------------------------------------"
+		statistics[unitsInHiddenLayer].printValues()
 
 
 

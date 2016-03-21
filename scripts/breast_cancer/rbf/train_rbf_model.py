@@ -8,8 +8,9 @@ sys.path.append(currentFileDir + '/../../')
 
 import utilities as utl
 
-def trainModel(unitsInHiddenLayer = 9):
-	print ("Reading Training Data (Cancer Problem)")
+def trainModel(unitsInHiddenLayer = 9, debug = True):
+	if debug:
+		print ("Reading Training Data (Cancer Problem)")
 	# Reading Training data
 	trainData = utl.readDataSetAsMatrix(utl.BREAST_CANCER_TRAINING_FILE, 1, ',')
 
@@ -17,7 +18,8 @@ def trainModel(unitsInHiddenLayer = 9):
 	inputs = trainData[:, :9]
 	outputs = trainData[:, 9:]
 	
-	print("Training RBF Model (Cancer problem)")
+	if debug:
+		print("Training RBF Model (Cancer problem)")
 	configuration = utl.RBFTrainProcessConfiguration()
 	configuration.unitsInHiddenLayer = unitsInHiddenLayer
 

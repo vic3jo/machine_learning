@@ -4,7 +4,7 @@ currentFileDir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(currentFileDir + '/../../')
 import utilities as utl
 
-def evaluate(debug = True):
+def evaluate(model, debug = True):
 	if debug:
 		print ("Reading Testing Data for cancer problem")
 	
@@ -14,14 +14,9 @@ def evaluate(debug = True):
 	inputs = testingData[:, :9]
 	outputs = testingData[:, 9:]
 
-	neuralNetwork = utl.readModelFromLocation\
-	(
-		utl.BREAST_CANCER_RBF_MODEL_FILE
-	)
-
 	return utl.evaluateClassificationModel\
 	(
-		neuralNetwork,
+		model,
 		inputs,
 		outputs,
 		'RBF: cancer problem',
@@ -30,4 +25,8 @@ def evaluate(debug = True):
 
 
 if __name__ == "__main__":
-	evaluate()
+	model = utl.readModelFromLocation\
+	(
+		utl.BREAST_CANCER_RBF_MODEL_FILE
+	)
+	evaluate(model)
