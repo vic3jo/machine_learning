@@ -6,8 +6,10 @@ import utilities as utl
 from pybrain.structure import LinearLayer
 
 
-def trainModel(unitsInHiddenLayer = 8):
-	print("Reading Training Data MLP Model (Currency Exchange problem)")
+def trainModel(unitsInHiddenLayer = 8, debug = True):
+	
+	if debug:
+		print("Reading Training Data MLP Model (Currency Exchange problem)")
 	# Reading Training data
 	trainData = utl.readDataSetAsMatrix(\
 		utl.CURRENCY_EXCHANGE_TRAINING_FILE(\
@@ -19,7 +21,9 @@ def trainModel(unitsInHiddenLayer = 8):
 	inputs = utl.createPattern(trainData[:-1, 2:], width)
 	outputs = trainData[(width+1):, 2:]
 	
-	print("Training Model MLP Model (Currency Exchange problem)")
+	if debug:
+		print("Training Model MLP Model (Currency Exchange problem)")
+
 	configuration = utl.MLPTrainProcessConfiguration()
 	configuration.unitsInHiddenLayer = unitsInHiddenLayer
 	configuration.outputLayer = LinearLayer

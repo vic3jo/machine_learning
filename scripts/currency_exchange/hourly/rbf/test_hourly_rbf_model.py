@@ -5,7 +5,7 @@ currentFileDir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(currentFileDir + '/../../../')
 import utilities as utl
 
-def evaluate(debug = True):
+def evaluate(model, debug = True):
 	# Reading testing data
 	testingData = utl.readDataSetAsMatrix(\
 		utl.CURRENCY_EXCHANGE_TESTING_FILE(\
@@ -16,14 +16,10 @@ def evaluate(debug = True):
 	width = utl.HOURLY_WIDTH
 	inputs = utl.createPattern(testingData[:-1, 2:], width)
 	outputs = testingData[(width+1):, 2:]
-	neuralNetwork = utl.readModelFromLocation(\
-		utl.CURRENCY_EXCHANGE_RBF_MODEL_FILE(\
-			utl.SAMPLING_TYPE.HOURLY
-		)
-	)
+	
 
 	return utl.evaluateRegressionModel(\
-		neuralNetwork,
+		model,
 		inputs,
 		outputs,
 		"RBF : Currency exchange problem 'hourly'",
@@ -31,4 +27,9 @@ def evaluate(debug = True):
 	)
 
 if __name__ == "__main__":
-	evaluate()
+	model = utl.readModelFromLocation(\
+		utl.CURRENCY_EXCHANGE_RBF_MODEL_FILE(\
+			utl.SAMPLING_TYPE.HOURLY
+		)
+	)
+	evaluate(model)

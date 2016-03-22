@@ -417,9 +417,49 @@ def evaluateRegressionModel(model, inputs, outputs, label = '', debug = True):
 	customPrint("MSE = {}".format(MSE), debug)
 	return MSE
 
+class ClassificationResult(object):
+	"""ClassificationResult"""
+	def __init__(self, predictions, outputs, classMapper):
+		super(ClassificationResult, self).__init__()
+		predictions = map(classMapper, predictions)
+		outputs = map(classMapper, outputs)
+		self.classes = set(predictions).union(set(outputs))
+		matrix = {
+			ct:{cp:0 for cp in self.classes}
+			for ct in self.classes
+		}
+		for i in range(len(predictions)):
+			ct = outputs[i]
+			cp = predictions[i]
+			matrix[ct][cp]+=1
 
+		self.confusionMatrix = matrix
+		self.classificationRate = Validator.classificationPerformance(\
+			predictions,
+			outputs
+		)
+	def __confusionMatrixRepresentation(self):
+		header = ["{:^10}".format('T/P->')]
+		for c in self.classes:
+			header.append("{:^10}".format(c))
+		header =  '|'.join(header)
+		rows = []
+		for ct in self.classes:
+			content = ["{:^10} ".format(ct)]
+			for cp in self.classes:
+				content.append("{:^10}".format(self.confusionMatrix[ct][cp]))
+			rows.append("|".join(content))
+		body = '\n'.join(rows)
+		return "{}\n{}".format(header, body)
 
-def evaluateClassificationModel(model, inputs, outputs, label = '', debug = True):
+	def __str__(self):
+		return "\t\tClassification Rate = {} \n\n \t\tConfusion Matrix \n {}\n".format(
+			self.classificationRate,
+			self.__confusionMatrixRepresentation()
+		)
+		
+
+def evaluateClassificationModel(model, inputs, outputs, label = '', debug = True, classMapper = lambda x: int(x[0])):
 	
 	customPrint(\
 		"Reading Training Data ({})".format(label),
@@ -438,28 +478,14 @@ def evaluateClassificationModel(model, inputs, outputs, label = '', debug = True
 		for r in range(rows)
 	])
 
-	classificationRate =  Validator.classificationPerformance(\
-		predictions,
-		outputs
-	)
-
-
 	
 
-	mapper = lambda x: (int(x[0]), int(x[1]))
-	confusionMatrix  = Counter([\
-		str( mapper(c) )
-		for c in zip(predictions, outputs)  
-	])
+	result = ClassificationResult(predictions, outputs, classMapper)
 
 	if debug:
-		print("Classification Rate = {}".format(classificationRate))
-		print("True Positives  = {}".format( confusionMatrix['(1, 1)'] ))
-		print("False Positives = {}".format( confusionMatrix['(1, 0)'] ))
-		print("False Negatives = {}".format( confusionMatrix['(0, 1)'] ))
-		print("True Negatives = {}".format( confusionMatrix['(0, 0)'] ))
+		print(result)
 
-	return classificationRate
+	return result
 
 
 def measureRunningTime(operation):
@@ -486,15 +512,15 @@ def getMemoryUsage():
 
 
 
-class AverageClassifierStatistics(object):
-	"""Average Classifier Statistics"""
+class AverageModelStatistics(object):
+	"""Average Model Statistics"""
 	def __init__(\
 		self
 	):
-		super(AverageClassifierStatistics, self).__init__()
+		super(AverageModelStatistics, self).__init__()
 		self.trainingTime = 0.0
 		self.testingTime = 0.0
-		self.classificationRate = 0.0
+		self.performance = None
 		self.trainingMemory = 0.0
 		self.testingMemory = 0.0
 		self.trainingEpochs = 0
@@ -505,17 +531,30 @@ class AverageClassifierStatistics(object):
 		print("\t\tAverage time taken testing  = {} seconds".format(self.testingTime))
 		print("\t\tAverage memory taken training  = {} MB".format(self.trainingMemory))
 		print("\t\tAverage memory taken testing  = {} MB".format(self.testingMemory))
-		print("\t\tAverage classification rate {}".format(self.classificationRate))
+		print(self.performance)
+
+
+
+def takeBestClassification(performances):
+	best = None
+	classificationRate = 0
+	for p in performances:
+		if p.classificationRate > classificationRate:
+			best = p
+			classificationRate = p.classificationRate
+	return best
+
 
 
 def evaluateNeuralNetworkForDifferentHiddenLayerSizes(\
 	trainFunction,
 	testFunction,
 	hiddenLayerSizes,
-	numberOfTries = 5
+	numberOfTries = 5,
+	combinePerformance = takeBestClassification
 ):
 	statistics = {\
-		n:AverageClassifierStatistics()
+		n:AverageModelStatistics()
 		for n in hiddenLayerSizes
 	}
 
@@ -526,14 +565,15 @@ def evaluateNeuralNetworkForDifferentHiddenLayerSizes(\
 
 		trainingTimes, testingTimes = [], []
 		trainingMemoryUsages, testingMemoryUsages = [], []
-		classificationRates, trainingEpochs = [], []
+		performances, trainingEpochs = [], []
 		for i in range(numberOfTries):
 			trainingResult, trainingMLPModelTime = measureRunningTime(\
 				lambda : trainFunction(unitsInHiddenLayer, False)
 			)
 
 			model, errorsByEpoch = trainingResult
-			classificationRate, testingMLPModelTime = measureRunningTime(\
+
+			performance, testingMLPModelTime = measureRunningTime(\
 				lambda : testFunction(model, debug = False)
 			)
 
@@ -548,7 +588,7 @@ def evaluateNeuralNetworkForDifferentHiddenLayerSizes(\
 
 			trainingTimes.append(trainingMLPModelTime)
 			testingTimes.append(testingMLPModelTime)
-			classificationRates.append(classificationRate)
+			performances.append(performance)
 			trainingEpochs.append(len(errorsByEpoch))
 
 		statistics[unitsInHiddenLayer].trainingEpochs = sum(trainingEpochs)/len(trainingEpochs)
@@ -556,7 +596,7 @@ def evaluateNeuralNetworkForDifferentHiddenLayerSizes(\
 		statistics[unitsInHiddenLayer].testingTime = sum(testingTimes)/len(testingTimes)
 		statistics[unitsInHiddenLayer].trainingMemory = sum(trainingMemoryUsages)/len(trainingMemoryUsages)
 		statistics[unitsInHiddenLayer].testingMemory = sum(testingMemoryUsages)/len(testingMemoryUsages)
-		statistics[unitsInHiddenLayer].classificationRate = sum(classificationRates)/len(classificationRates)
+		statistics[unitsInHiddenLayer].performance = combinePerformance(performances)
 
 	return statistics
 
