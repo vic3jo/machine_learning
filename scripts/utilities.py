@@ -518,20 +518,25 @@ class AverageModelStatistics(object):
 		self
 	):
 		super(AverageModelStatistics, self).__init__()
-		self.trainingTime = 0.0
-		self.testingTime = 0.0
+		self.trainingTime = None
+		self.testingTime = None
 		self.performance = None
-		self.trainingMemory = 0.0
-		self.testingMemory = 0.0
-		self.trainingEpochs = 0
+		self.trainingMemory = None
+		self.testingMemory = None
+		self.trainingEpochs = None
 	
+	def __printIfNotNone(self, formattedText, value):
+		if not value is None:
+			print(formattedText.format(value))
+
 	def printValues(self):
-		print("\t\tAverage epochs taken to train {}".format(self.trainingEpochs))
-		print("\t\tAverage time taken training  = {} seconds".format(self.trainingTime))
-		print("\t\tAverage time taken testing  = {} seconds".format(self.testingTime))
-		print("\t\tAverage memory taken training  = {} MB".format(self.trainingMemory))
-		print("\t\tAverage memory taken testing  = {} MB".format(self.testingMemory))
-		print(self.performance)
+
+		self.__printIfNotNone("\t\tAverage epochs taken to train {}", self.trainingEpochs)
+		self.__printIfNotNone("\t\tAverage time taken training  = {} seconds", self.trainingTime)
+		self.__printIfNotNone("\t\tAverage time taken testing  = {} seconds", self.testingTime)
+		self.__printIfNotNone("\t\tAverage memory taken training  = {} MB", self.trainingMemory)
+		self.__printIfNotNone("\t\tAverage memory taken testing  = {} MB", self.testingMemory)
+		self.__printIfNotNone('{}', self.performance)
 
 
 
@@ -601,13 +606,68 @@ def evaluateNeuralNetworkForDifferentHiddenLayerSizes(\
 	return statistics
 
 
-def printStatistics(statistics):
-	for unitsInHiddenLayer in sorted(statistics.keys()):
-		print "\n\tNumber Of Units in Hidden Layer  = {}".format(\
-			unitsInHiddenLayer
+import random
+
+def evaluateNetworkOnNoisyData(\
+	model,
+	testFunction,
+	testDataGetter,
+	percentageOfNoisyData,
+	numberOfTries = 5,
+	noisyFunction =  lambda : random.uniform(-10, 10),
+	combinePerformance = takeBestClassification
+):
+	statistics = {\
+		n:AverageModelStatistics()
+		for n in percentageOfNoisyData
+	}
+
+	for percentage in percentageOfNoisyData:
+		print "\tEvaluation for  {}% of noisy data".format(\
+			percentage
 		)
+
+		testingTimes = []
+		testingMemoryUsages = []
+		performances = []
+		for i in range(numberOfTries):
+			
+			inputs, outputs = testDataGetter()
+			rows, cols = inputs.shape
+
+			# Getting the number of k samples to get
+			k = int((float(percentage) * rows) / 100)
+			# At least one sample if the previous result is 0
+			if k < 1: k = 1
+
+			# Adding noisy to a percentage of the test data 
+			# 25% of the features for each sample are noisy	
+			for sample in  random.sample(range(rows), k):
+			    for column in random.sample(range(cols), cols/4):
+			    	inputs[sample, column] = noisyFunction()
+
+			performance, testingMLPModelTime = measureRunningTime(\
+				lambda : testFunction(model, debug = False, inputs = inputs, outputs = outputs)
+			)
+
+			testingMemoryUsages.append(
+				max(memory_usage(lambda :  testFunction(model, debug = False, inputs = inputs, outputs = outputs)))
+			)
+			testingTimes.append(testingMLPModelTime)
+			performances.append(performance)
+			
+		statistics[percentage].testingTime = sum(testingTimes)/len(testingTimes)
+		statistics[percentage].testingMemory = sum(testingMemoryUsages)/len(testingMemoryUsages)
+		statistics[percentage].performance = combinePerformance(performances)
+
+	return statistics
+
+
+def printStatistics(statistics, formattedTitle = "\n\tNumber Of Units in Hidden Layer  = {}"):
+	for k in sorted(statistics.keys()):
+		print formattedTitle.format(k)
 		print "\t------------------------------------"
-		statistics[unitsInHiddenLayer].printValues()
+		statistics[k].printValues()
 
 
 

@@ -33,7 +33,7 @@ def trainModel(unitsInHiddenLayer = 9, debug = True):
 
 if __name__ == "__main__":
 
-	model, errorsByEpoch = trainModel(2)
+	model, errorsByEpoch = trainModel(8)
 	
 	print ("Saving RBF Trained Model (Cancer Problem)")
 	utl.saveModelAtLocation(\

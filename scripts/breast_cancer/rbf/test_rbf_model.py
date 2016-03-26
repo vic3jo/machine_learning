@@ -4,15 +4,17 @@ currentFileDir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(currentFileDir + '/../../')
 import utilities as utl
 
-def evaluate(model, debug = True):
+def evaluate(model, debug = True, inputs = None, outputs = None):
 	if debug:
 		print ("Reading Testing Data for cancer problem")
-	
-	# Reading testing data
-	testingData = utl.readDataSetAsMatrix(utl.BREAST_CANCER_TESTING_FILE, 1, ',')
 
-	inputs = testingData[:, :9]
-	outputs = testingData[:, 9:]
+
+	if inputs is None or outputs is None:
+		# Reading testing data
+		testingData = utl.readDataSetAsMatrix(utl.BREAST_CANCER_TESTING_FILE, 1, ',')
+
+		inputs = testingData[:, :9]
+		outputs = testingData[:, 9:]
 
 	return utl.evaluateClassificationModel\
 	(

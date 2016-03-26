@@ -13,7 +13,7 @@ import train_rbf_model, test_rbf_model
 
 
 base2Power = lambda r: map(lambda x: 2**x, r)
-numberOfTries = 1
+numberOfTries = 5
 hiddenLayerSizes = base2Power(range(1, 6))
 
 print("Cancer Problem")
