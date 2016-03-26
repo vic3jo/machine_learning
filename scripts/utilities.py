@@ -187,9 +187,8 @@ class RBFNetwork(object):
 
 
 def gaussian(x, xi, variance):
-	v = (x - xi)
 	vs = np.linalg.norm(x - xi)**2
-	return np.exp(vs/variance)
+	return np.exp(-0.5*vs/variance)
 
 def allDistances(x, centers, variances):
 	rows, cols = centers.shape
