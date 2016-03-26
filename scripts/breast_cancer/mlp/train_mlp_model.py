@@ -30,7 +30,7 @@ def trainModel(unitsInHiddenLayer = 8, debug = True):
 
 if __name__ == "__main__":
 
-	model, errorsByEpoch = trainModel(16)
+	model, errorsByEpoch = trainModel(8)
 	
 	print ("Saving MLP Trained Model for the cancer problem")
 	utl.saveModelAtLocation(\

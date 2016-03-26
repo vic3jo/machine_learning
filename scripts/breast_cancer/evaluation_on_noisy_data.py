@@ -10,8 +10,6 @@ import train_mlp_model, test_mlp_model
 import train_rbf_model, test_rbf_model
 from memory_profiler import memory_usage
 
-
-
 def getTestData():
 	testingData = utl.readDataSetAsMatrix(utl.BREAST_CANCER_TESTING_FILE, 1, ',')
 	inputs = testingData[:, :9]
@@ -20,13 +18,12 @@ def getTestData():
 
 
 
-base2Power = lambda r: map(lambda x: 2**x, r)
 numberOfTries = 10
 percentageOfNoisyData = [1, 5, 10]
 
 print("Cancer Problem")
 print("\n\nEvaluating MLP:")
-mlpModel, epochs = train_mlp_model.trainModel(16)
+mlpModel, epochs = train_mlp_model.trainModel(8)
 mlpStatistics = utl.evaluateNetworkOnNoisyData(\
 	mlpModel,
 	test_mlp_model.evaluate,

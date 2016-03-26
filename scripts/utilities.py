@@ -614,8 +614,9 @@ def evaluateNetworkOnNoisyData(\
 	testDataGetter,
 	percentageOfNoisyData,
 	numberOfTries = 5,
-	noisyFunction =  lambda : random.uniform(-10, 10),
-	combinePerformance = takeBestClassification
+	combinePerformance = takeBestClassification,
+	noisyFunction =  lambda : random.uniform(-10, 10)
+	
 ):
 	statistics = {\
 		n:AverageModelStatistics()
