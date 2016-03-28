@@ -176,15 +176,7 @@ Files Descriptions:
                 to test the mlp and rbf trained neural network models for the cancer classification problem.
 
 
-        - Poker hands Problem:
-           
-            1. Run the scripts:         scripts/poker_hand/mlp/train_mlp_model.py 
-                                AND     scripts/poker_hand/rbf/train_rbf_model.py 
-                to train the mlp and rbf neural network models for the poker hands classification problem.
-           
-            2. Run the scripts:         scripts/poker_hand/mlp/test_mlp_model.py 
-                                AND     scripts/poker_hand/rbf/test_rbf_model.py 
-                to test the mlp and rbf trained neural network models for the poker hands classification problem.
+        - Poker hands Problem: These were performed using the Neuroph tool.
 
 
         - Currency exchange rate prediction Problem:
@@ -217,10 +209,7 @@ Files Descriptions:
                 to evaluate the different architecture of  mlp and rbf neural network models forc urrency exchange rate prediction  problems and to evaluate the effect of adding noisy data to the testing data.
 
 
-        - Poker hands Problem:
-            1. Run the scripts:         scripts/poker_hand/evaluating_different_topologies.py 
-                                AND     scripts/poker_hand/evaluation_on_noisy_data.py 
-                to evaluate the different architecture of  mlp and rbf neural network models for the poker hands classification problem and to evaluate the effect of adding noisy data to the testing data.
+        - Poker hands Problem: These were performed using the Neuroph tool.
 
 
 
