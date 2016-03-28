@@ -1,3 +1,8 @@
+"""
+Authors: Swati Bhartiya, Victor Trejo, and Utkarsh Bali
+Description: script to evaluate the neural networks on noisy data.
+"""
+
 import sys, os
 # Adding reference to the scripts folder
 currentFileDir = os.path.dirname(os.path.abspath(__file__))
@@ -19,7 +24,8 @@ def getTestData():
 
 
 numberOfTries = 10
-percentageOfNoisyData = [1, 5, 10]
+#  Percentages of noisy data.
+percentageOfNoisyData = [0, 1, 5, 10]
 
 print("Cancer Problem")
 print("\n\nEvaluating MLP:")

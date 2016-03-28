@@ -1,3 +1,8 @@
+"""
+Authors: Swati Bhartiya, Victor Trejo, and Utkarsh Bali
+Description: Script to test the trained mlp  model for the cancer problem.
+"""
+
 import sys, os
 # Adding reference to the scripts folder
 currentFileDir = os.path.dirname(os.path.abspath(__file__))

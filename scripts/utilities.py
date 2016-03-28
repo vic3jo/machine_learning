@@ -634,17 +634,17 @@ def evaluateNetworkOnNoisyData(\
 			
 			inputs, outputs = testDataGetter()
 			rows, cols = inputs.shape
+			if percentage > 0:
+				# Getting the number of k samples to get
+				k = int((float(percentage) * rows) / 100)
+				# At least one sample if the previous result is 0
+				if k < 1: k = 1
 
-			# Getting the number of k samples to get
-			k = int((float(percentage) * rows) / 100)
-			# At least one sample if the previous result is 0
-			if k < 1: k = 1
-
-			# Adding noisy to a percentage of the test data 
-			# 25% of the features for each sample are noisy	
-			for sample in  random.sample(range(rows), k):
-			    for column in random.sample(range(cols), cols/4):
-			    	inputs[sample, column] = noisyFunction()
+				# Adding noisy to a percentage of the test data 
+				# 25% of the features for each sample are noisy	
+				for sample in  random.sample(range(rows), k):
+				    for column in random.sample(range(cols), cols/4):
+				    	inputs[sample, column] = noisyFunction()
 
 			performance, testingMLPModelTime = measureRunningTime(\
 				lambda : testFunction(model, debug = False, inputs = inputs, outputs = outputs)
@@ -683,6 +683,8 @@ CURRENCY_EXCHANGE_TESTING_FILE = lambda samplingType: '{}{}_testing.dat'.format(
 CURRENCY_EXCHANGE_MODEL_FOLDER = '{}/../models/currency_exchange/'.format(currentFileDir)
 CURRENCY_EXCHANGE_MLP_MODEL_FILE = lambda samplingType: '{}{}_mlp_model.pkl'.format(CURRENCY_EXCHANGE_MODEL_FOLDER, samplingType)
 CURRENCY_EXCHANGE_RBF_MODEL_FILE = lambda samplingType: '{}{}_rbf_model.pkl'.format(CURRENCY_EXCHANGE_MODEL_FOLDER, samplingType)
+
+# Number of samples that are going to be used to predict a future value (Pattern size)
 DAILY_WIDTH = 5
 HOURLY_WIDTH = 5
 

@@ -1,3 +1,8 @@
+"""
+Authors: Swati Bhartiya, Victor Trejo, and Utkarsh Bali
+Description: Script to test the  trained rbf  model for the hourly case.
+"""
+
 import sys, os
 import numpy as np
 # Adding reference to the scripts folder

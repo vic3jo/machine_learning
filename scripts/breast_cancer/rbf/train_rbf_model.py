@@ -1,3 +1,7 @@
+"""
+Authors: Swati Bhartiya, Victor Trejo, and Utkarsh Bali
+Description: Script to train the rbf  model for the cancer problem.
+"""
 import sys, os
 
 from pybrain.structure import LinearLayer

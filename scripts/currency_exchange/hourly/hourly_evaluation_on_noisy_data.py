@@ -1,3 +1,8 @@
+"""
+Authors: Swati Bhartiya, Victor Trejo, and Utkarsh Bali
+Description: script to evaluate the neural networks on noisy data.
+"""
+
 import sys, os, random
 # Adding reference to the scripts folder
 currentFileDir = os.path.dirname(os.path.abspath(__file__))
@@ -27,7 +32,7 @@ def getTestData():
 
 
 numberOfTries = 10
-percentageOfNoisyData = [1, 5, 10]
+percentageOfNoisyData = [0, 1, 5, 10]
 
 print("(Currency Exchange problem)")
 print("\n\nEvaluating MLP:")
@@ -38,8 +43,7 @@ mlpStatistics = utl.evaluateNetworkOnNoisyData(\
 	getTestData,
 	percentageOfNoisyData,
 	numberOfTries,
-	lambda x: "\t\tAverage MSE = {}".format(sum(x)/len(x)),
-	noisyFunction =  lambda : random.uniform(-3, 3)
+	lambda x: "\t\tAverage MSE = {}".format(sum(x)/len(x))
 )
 
 print("\n\nEvaluating RBF:")
@@ -50,8 +54,7 @@ rbfStatistics = utl.evaluateNetworkOnNoisyData(\
 	getTestData,
 	percentageOfNoisyData,
 	numberOfTries,
-	lambda x: "\t\tAverage MSE = {}".format(sum(x)/len(x)),
-	noisyFunction =  lambda : random.uniform(-3, 3)
+	lambda x: "\t\tAverage MSE = {}".format(sum(x)/len(x))
 )
 
 print("\n\nMLP statistics:")

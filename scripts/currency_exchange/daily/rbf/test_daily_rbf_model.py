@@ -1,3 +1,9 @@
+"""
+Authors: Swati Bhartiya, Victor Trejo, and Utkarsh Bali
+Description: Script to test the mlp trained model for the daily case.
+"""
+
+
 import sys, os
 # Adding reference to the scripts folder
 currentFileDir = os.path.dirname(os.path.abspath(__file__))
