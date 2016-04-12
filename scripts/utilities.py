@@ -8,6 +8,7 @@ from pybrain.datasets import SupervisedDataSet
 from pybrain.datasets import SequentialDataSet
 from pybrain.supervised.trainers import BackpropTrainer, RPropMinusTrainer
 from pybrain.structure import SigmoidLayer
+from pybrain.structure import BiasUnit
 from pybrain.structure import LinearLayer
 from pybrain.structure import GaussianLayer
 from pybrain.structure import FeedForwardNetwork
@@ -227,7 +228,6 @@ def __createSequentialDataSet(samples):
 	)
 
 	for i in range(rows-1):
-		print i
 		dataset.addSample(\
 			samples[i],
 			samples[i+1]
@@ -236,10 +236,12 @@ def __createSequentialDataSet(samples):
 
 
 
-def trainJordanRecurrentNetwork(\
+
+def __trainSimpleRecurrentNetwork(\
 	samples,
 	outputSize,
-	trainingConfiguration
+	trainingConfiguration,
+	loopFromOutput
 ):
 	rows, numberOfFeatures = samples.shape
 
@@ -249,24 +251,43 @@ def trainJordanRecurrentNetwork(\
 	hiddenLayer = SigmoidLayer(\
 		trainingConfiguration.unitsInHiddenLayer
 	)
+	hiddenLayerBias = BiasUnit()
+	outputLayerBias = BiasUnit()
+
 	outputLayer = LinearLayer(outputSize)
 
 	# Adding network layers 
 	network.addInputModule(inputLayer)
+	network.addModule(hiddenLayerBias)
 	network.addModule(hiddenLayer)
+	network.addModule(outputLayerBias)
 	network.addOutputModule(outputLayer)
 
 	# Creating and adding connections
 	network.addConnection(\
 		FullConnection(inputLayer, hiddenLayer)
 	)
+
+	network.addConnection(\
+		FullConnection(hiddenLayerBias, hiddenLayer)
+	)
+
 	network.addConnection(\
 		FullConnection(hiddenLayer, outputLayer)
 	)
 
-	network.addRecurrentConnection(\
-		FullConnection(outputLayer, hiddenLayer)
+	network.addConnection(\
+		FullConnection(outputLayerBias, outputLayer)
 	)
+
+	if loopFromOutput:
+		network.addRecurrentConnection(\
+			FullConnection(outputLayer, hiddenLayer)
+		)
+	else:
+		network.addRecurrentConnection(\
+			FullConnection(hiddenLayer, hiddenLayer)
+		)
 
 	network.sortModules()
 
@@ -276,17 +297,43 @@ def trainJordanRecurrentNetwork(\
 
 	trainer = trainingConfiguration.trainer(\
 		network,
-		dataset = dataset
+		dataset = dataset,
+		momentum = trainingConfiguration.momentum
 	)
 
-	# trainer.trainUntilConvergence(\
-	# 	maxEpochs = trainingConfiguration.maxEpochs
-	# )
-
+	errorsByEpoch = []
 	for epoch in range(1, trainingConfiguration.maxEpochs + 1):
-		trainer.train()
+		trainingError = trainer.train()
+		errorsByEpoch.append(trainingError)
 
-	return network, []
+	return network, errorsByEpoch
+
+
+def trainJordanRecurrentNetwork(\
+	samples,
+	outputSize,
+	trainingConfiguration
+):
+	return __trainSimpleRecurrentNetwork(\
+		samples,
+		outputSize,
+		trainingConfiguration,
+		True
+	)
+
+def trainELmanRecurrentNetwork(\
+	samples,
+	outputSize,
+	trainingConfiguration
+):
+	return __trainSimpleRecurrentNetwork(\
+		samples,
+		outputSize,
+		trainingConfiguration,
+		False
+	)
+
+
 
 
 def trainRBFNetwork(\
@@ -346,10 +393,6 @@ def trainRBFNetwork(\
 		neuralNetwork,
 		dataset = trainSet
 	)
-
-	# trainer.trainUntilConvergence(\
-	# 	maxEpochs = trainProcessConfiguration.maxEpochs
-	# )
 
 	network, errorsByEpoch = earlyStopTraining(
 		crossValSet,
@@ -772,6 +815,8 @@ CURRENCY_EXCHANGE_MODEL_FOLDER = '{}/../models/currency_exchange/'.format(curren
 CURRENCY_EXCHANGE_MLP_MODEL_FILE = lambda samplingType: '{}{}_mlp_model.pkl'.format(CURRENCY_EXCHANGE_MODEL_FOLDER, samplingType)
 CURRENCY_EXCHANGE_RBF_MODEL_FILE = lambda samplingType: '{}{}_rbf_model.pkl'.format(CURRENCY_EXCHANGE_MODEL_FOLDER, samplingType)
 CURRENCY_EXCHANGE_RNN_JORDAN_MODEL_FILE = lambda samplingType: '{}{}_rnn_jordan_model.pkl'.format(CURRENCY_EXCHANGE_MODEL_FOLDER, samplingType)
+CURRENCY_EXCHANGE_RNN_ELMAN_MODEL_FILE = lambda samplingType: '{}{}_rnn_elman_model.pkl'.format(CURRENCY_EXCHANGE_MODEL_FOLDER, samplingType)
+
 
 
 # Number of samples that are going to be used to predict a future value (Pattern size)

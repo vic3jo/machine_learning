@@ -1,6 +1,6 @@
 """
 Authors: Swati Bhartiya, Victor Trejo, and Utkarsh Bali
-Description: Script to test the RNN Jordan trained model for the daily case.
+Description: Script to test the RNN Jordan trained model for the hourly case.
 """
 
 import sys, os
@@ -16,7 +16,7 @@ def evaluate(model, debug = True, inputs = None, outputs = None):
 		# Reading testing data
 		testingData = utl.readDataSetAsMatrix(\
 			utl.CURRENCY_EXCHANGE_TESTING_FILE(\
-				utl.SAMPLING_TYPE.AT_CLOSING_DAY
+				utl.SAMPLING_TYPE.HOURLY
 			)
 		)
 
@@ -37,7 +37,7 @@ def evaluate(model, debug = True, inputs = None, outputs = None):
 if __name__ == "__main__":
 	model = utl.readModelFromLocation(\
 		utl.CURRENCY_EXCHANGE_RNN_JORDAN_MODEL_FILE(\
-			utl.SAMPLING_TYPE.AT_CLOSING_DAY
+			utl.SAMPLING_TYPE.HOURLY
 		)
 	)
 	evaluate(model)

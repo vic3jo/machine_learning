@@ -1,6 +1,6 @@
 """
 Authors: Swati Bhartiya, Victor Trejo, and Utkarsh Bali
-Description: Script to train the RNN Jordan model for the daily case.
+Description: Script to train the RNN Elman model for the daily case.
 """
 
 import sys, os
@@ -12,7 +12,7 @@ from pybrain.structure import LinearLayer
 
 def trainModel(unitsInHiddenLayer = 8, debug = True):
 	if debug:
-		print("Reading Training Data RNN Jordan Model (Currency Exchange problem)")
+		print("Reading Training Data RNN Elman Model (Currency Exchange problem)")
 	# Reading Training data
 	trainData = utl.readDataSetAsMatrix(\
 		utl.CURRENCY_EXCHANGE_TRAINING_FILE(\
@@ -23,7 +23,7 @@ def trainModel(unitsInHiddenLayer = 8, debug = True):
 	inputs = trainData[:, 2:]
 
 	if debug:
-		print("Training Model RNN Jordan Model (Currency Exchange problem)")
+		print("Training Model RNN Elman Model (Currency Exchange problem)")
 
 	configuration = utl.RecurrentTrainProcessConfiguration()
 	configuration.unitsInHiddenLayer = unitsInHiddenLayer
@@ -32,19 +32,19 @@ def trainModel(unitsInHiddenLayer = 8, debug = True):
 	configuration.learningrate = 0.001
 	configuration.momentum = 0.95
 	
-	return utl.trainJordanRecurrentNetwork(\
+	return utl.trainELmanRecurrentNetwork(\
 		inputs, 1, configuration
 	)
 
 
 if __name__ == "__main__":
 
-	model, errorsByEpoch = trainModel(2)
+	model, errorsByEpoch = trainModel(4)
 
-	print("Saving RNN Jordan Trained Model (Currency Exchange problem)")
+	print("Saving RNN Elman Trained Model (Currency Exchange problem)")
 	utl.saveModelAtLocation(
 		model,
-		utl.CURRENCY_EXCHANGE_RNN_JORDAN_MODEL_FILE(\
+		utl.CURRENCY_EXCHANGE_RNN_ELMAN_MODEL_FILE(\
 			utl.SAMPLING_TYPE.AT_CLOSING_DAY
 		)
 	)

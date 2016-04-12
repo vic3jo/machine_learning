@@ -16,14 +16,14 @@ def trainModel(unitsInHiddenLayer = 8, debug = True):
 	# Reading Training data
 	trainData = utl.readDataSetAsMatrix(\
 		utl.CURRENCY_EXCHANGE_TRAINING_FILE(\
-			utl.SAMPLING_TYPE.AT_CLOSING_DAY
+			utl.SAMPLING_TYPE.HOURLY
 		)
 	)
 
 	inputs = trainData[:, 2:]
 
 	if debug:
-		print("Training Model RNN Jordan Model (Currency Exchange problem)")
+		print("Training Model RNN hourly Model (Currency Exchange problem)")
 
 	configuration = utl.RecurrentTrainProcessConfiguration()
 	configuration.unitsInHiddenLayer = unitsInHiddenLayer
@@ -45,6 +45,6 @@ if __name__ == "__main__":
 	utl.saveModelAtLocation(
 		model,
 		utl.CURRENCY_EXCHANGE_RNN_JORDAN_MODEL_FILE(\
-			utl.SAMPLING_TYPE.AT_CLOSING_DAY
+			utl.SAMPLING_TYPE.HOURLY
 		)
 	)

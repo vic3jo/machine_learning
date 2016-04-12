@@ -10,11 +10,14 @@ currentFileDir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(currentFileDir + '/../../')
 sys.path.append(currentFileDir + '/mlp/')
 sys.path.append(currentFileDir + '/rbf/')
+sys.path.append(currentFileDir + '/rnn_jordan/')
+sys.path.append(currentFileDir + '/rnn_elman/')
 
 import utilities as utl
 import train_hourly_mlp_model, test_hourly_mlp_model 
 import train_hourly_rbf_model, test_hourly_rbf_model
-
+import train_hourly_rnn_jordan_model, test_hourly_rnn_jordan_model
+import train_hourly_rnn_elman_model, test_hourly_rnn_elman_model
 
 
 
@@ -22,7 +25,7 @@ base2Power = lambda r: map(lambda x: 2**x, r)
 numberOfTries = 1
 hiddenLayerSizes = base2Power(range(1, 6))
 
-print("(Currency Exchange problem)")
+print("(Currency Exchange problem:Hourly)")
 print("\n\nEvaluating MLP:")
 mlpStatistics = utl.evaluateNeuralNetworkForDifferentHiddenLayerSizes(\
 	train_hourly_mlp_model.trainModel,
@@ -31,6 +34,28 @@ mlpStatistics = utl.evaluateNeuralNetworkForDifferentHiddenLayerSizes(\
 	numberOfTries,
 	lambda x: "\t\tAverage MSE = {}".format(sum(x)/len(x))
 )
+
+
+
+print("\n\nEvaluating RNN JORDAN:")
+rnnJordanStatistics = utl.evaluateNeuralNetworkForDifferentHiddenLayerSizes(\
+	train_hourly_rnn_jordan_model.trainModel,
+	test_hourly_rnn_jordan_model.evaluate,
+	hiddenLayerSizes,
+	numberOfTries,
+	lambda x: "\t\tAverage MSE = {}".format(sum(x)/len(x))
+)
+
+
+print("\n\nEvaluating RNN ELMAN:")
+rnnElmanStatistics = utl.evaluateNeuralNetworkForDifferentHiddenLayerSizes(\
+	train_hourly_rnn_elman_model.trainModel,
+	test_hourly_rnn_elman_model.evaluate,
+	hiddenLayerSizes,
+	numberOfTries,
+	lambda x: "\t\tAverage MSE = {}".format(sum(x)/len(x))
+)
+
 
 hiddenLayerSizes.append(-1)
 print("\n\nEvaluating RBF:")
@@ -47,3 +72,10 @@ utl.printStatistics(mlpStatistics)
 
 print("\n\nRBF statistics:")
 utl.printStatistics(rbfStatistics)
+
+print("\n\RNN JORDAN statistics:")
+utl.printStatistics(rnnJordanStatistics)
+
+
+print("\n\RNN ELMAN statistics:")
+utl.printStatistics(rnnElmanStatistics)
