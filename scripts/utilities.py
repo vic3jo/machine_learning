@@ -5,11 +5,13 @@ Description: This file contains information used through out the project.
 
 import csv, os, pickle,  time, psutil
 from pybrain.datasets import SupervisedDataSet
+from pybrain.datasets import SequentialDataSet
 from pybrain.supervised.trainers import BackpropTrainer, RPropMinusTrainer
 from pybrain.structure import SigmoidLayer
 from pybrain.structure import LinearLayer
 from pybrain.structure import GaussianLayer
 from pybrain.structure import FeedForwardNetwork
+from pybrain.structure import RecurrentNetwork
 from pybrain.tools.shortcuts import buildNetwork
 from pybrain.structure import FullConnection
 from pybrain.auxiliary import kmeans
@@ -51,6 +53,16 @@ class MLPTrainProcessConfiguration(object):
 		self.learningrate = 0.01
 
 
+class RecurrentTrainProcessConfiguration(object):
+	"""docstring for RecurrentTrainProcessConfiguration"""
+	def __init__(self):
+		super(RecurrentTrainProcessConfiguration, self).__init__()
+		self.unitsInHiddenLayer = 2
+		self.maxEpochs = 100
+		self.momentum = 0.9
+		self.learningrate = 0.01
+		self.trainer = RPropMinusTrainer
+
 
 
 def readFileIgnoringLinesForCondition(fileLocation, shouldBeIgnored):
@@ -70,22 +82,26 @@ def readFileIgnoringLinesForCondition(fileLocation, shouldBeIgnored):
 				validLines.append(line.strip())
 	return validLines
 
-def readCSVFile(fileLocation):
+def readCSVFile(fileLocation, readHeader=True):
 	'''
 	Reads a csv at a given location
 	parameters:
 		fileLocation -> location of the csv to read
 	returns: the first row that corresponds to the header and the values rows.
 	'''
+
+	firstRow = None
 	with open(fileLocation, 'rt') as sourceFile:
 		csvReader = csv.reader(sourceFile)	
 		rows = [row for row in csvReader]
+
 		# Reading first row that corresponds to the header
-		firstRow = rows.pop(0)
+		if readHeader:
+			firstRow = rows.pop(0)
 	return firstRow, rows
 
 
-def writeCSVFile(rows, header, fileLocation):
+def writeCSVFile(rows, header, fileLocation, writeHeader = True):
 	'''
 	Writes a csv at a given location
 	parameters:
@@ -96,7 +112,9 @@ def writeCSVFile(rows, header, fileLocation):
 	with open(fileLocation, 'w') as destinationFile:
 		writer = csv.writer(destinationFile)
 		# Writting header
-		writer.writerow(header)
+		if writeHeader:
+			writer.writerow(header)
+			
 		for row in rows: 
 			writer.writerow(row)
 		destinationFile.close()
@@ -146,6 +164,9 @@ def __createSupervisedDataSet(inputs, outputs):
 			inputs[r],
 			outputs[r]
 		)
+	
+
+
 	return dataset
 
 
@@ -198,7 +219,74 @@ def allDistances(x, centers, variances):
 	return result
 
 
+def __createSequentialDataSet(samples):
+	rows, numberOfFeatures = samples.shape
+	dataset = SequentialDataSet(\
+		numberOfFeatures,
+		numberOfFeatures
+	)
 
+	for i in range(rows-1):
+		print i
+		dataset.addSample(\
+			samples[i],
+			samples[i+1]
+		)
+	return dataset
+
+
+
+def trainJordanRecurrentNetwork(\
+	samples,
+	outputSize,
+	trainingConfiguration
+):
+	rows, numberOfFeatures = samples.shape
+
+	network = RecurrentNetwork()
+	# Creating network layers
+	inputLayer = LinearLayer(numberOfFeatures)
+	hiddenLayer = SigmoidLayer(\
+		trainingConfiguration.unitsInHiddenLayer
+	)
+	outputLayer = LinearLayer(outputSize)
+
+	# Adding network layers 
+	network.addInputModule(inputLayer)
+	network.addModule(hiddenLayer)
+	network.addOutputModule(outputLayer)
+
+	# Creating and adding connections
+	network.addConnection(\
+		FullConnection(inputLayer, hiddenLayer)
+	)
+	network.addConnection(\
+		FullConnection(hiddenLayer, outputLayer)
+	)
+
+	network.addRecurrentConnection(\
+		FullConnection(outputLayer, hiddenLayer)
+	)
+
+	network.sortModules()
+
+	dataset = __createSequentialDataSet(\
+		samples
+	)
+
+	trainer = trainingConfiguration.trainer(\
+		network,
+		dataset = dataset
+	)
+
+	# trainer.trainUntilConvergence(\
+	# 	maxEpochs = trainingConfiguration.maxEpochs
+	# )
+
+	for epoch in range(1, trainingConfiguration.maxEpochs + 1):
+		trainer.train()
+
+	return network, []
 
 
 def trainRBFNetwork(\
@@ -282,7 +370,7 @@ def earlyStopTraining(crossValSet, neuralNetwork, configuration, trainer):
 		# TODO: VERIFY
 		if epoch % 5 == 0:
 			validationError =  Validator.ESS(predictions, crossValSet['target'])
-			if validationError > previousStageError: break
+			if (validationError > previousStageError).all(): break
 			previousStageError = validationError
 			previousNetwork = neuralNetwork.copy()
 		trainingError = trainer.train()
@@ -683,6 +771,8 @@ CURRENCY_EXCHANGE_TESTING_FILE = lambda samplingType: '{}{}_testing.dat'.format(
 CURRENCY_EXCHANGE_MODEL_FOLDER = '{}/../models/currency_exchange/'.format(currentFileDir)
 CURRENCY_EXCHANGE_MLP_MODEL_FILE = lambda samplingType: '{}{}_mlp_model.pkl'.format(CURRENCY_EXCHANGE_MODEL_FOLDER, samplingType)
 CURRENCY_EXCHANGE_RBF_MODEL_FILE = lambda samplingType: '{}{}_rbf_model.pkl'.format(CURRENCY_EXCHANGE_MODEL_FOLDER, samplingType)
+CURRENCY_EXCHANGE_RNN_JORDAN_MODEL_FILE = lambda samplingType: '{}{}_rnn_jordan_model.pkl'.format(CURRENCY_EXCHANGE_MODEL_FOLDER, samplingType)
+
 
 # Number of samples that are going to be used to predict a future value (Pattern size)
 DAILY_WIDTH = 5
@@ -692,6 +782,15 @@ BREAST_CANCER_TRAINING_FILE = "{}/../data/processed/breast_cancer/training.csv".
 BREAST_CANCER_TESTING_FILE = "{}/../data/processed/breast_cancer/testing.csv".format(currentFileDir)
 BREAST_CANCER_MLP_MODEL_FILE = "{}/../models/breast_cancer/breast_cancer_mlp_model.pkl".format(currentFileDir)
 BREAST_CANCER_RBF_MODEL_FILE = "{}/../models/breast_cancer/breast_cancer_rbf_model.pkl".format(currentFileDir)
+
+
+
+
+POKER_HANDS_TRAINING_FILE = "{}/../data/processed/poker_hand/poker-hand-training-true.csv".format(currentFileDir)
+POKER_HANDS_TESTING_FILE = "{}/../data/processed/poker_hand/poker-hand-testing.csv".format(currentFileDir)
+POKER_HANDS_MLP_MODEL_FILE = "{}/../models/poker_hand/poker_hand_mlp_model.pkl".format(currentFileDir)
+POKER_HANDS_RBF_MODEL_FILE = "{}/../models/poker_hand/poker_hand_rbf_model.pkl".format(currentFileDir)
+
 
 
 
