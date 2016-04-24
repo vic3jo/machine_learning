@@ -26,14 +26,14 @@ numberOfTries = 5
 hiddenLayerSizes = base2Power(range(1, 6))
 
 print("(Currency Exchange problem:  Daily)")
-# print("\n\nEvaluating MLP:")
-# mlpStatistics = utl.evaluateNeuralNetworkForDifferentHiddenLayerSizes(\
-# 	train_daily_mlp_model.trainModel,
-# 	test_daily_mlp_model.evaluate,
-# 	hiddenLayerSizes,
-# 	numberOfTries,
-# 	lambda x: "\t\tAverage MSE = {}".format(sum(x)/len(x))
-# )
+print("\n\nEvaluating MLP:")
+mlpStatistics = utl.evaluateNeuralNetworkForDifferentHiddenLayerSizes(\
+	train_daily_mlp_model.trainModel,
+	test_daily_mlp_model.evaluate,
+	hiddenLayerSizes,
+	numberOfTries,
+	lambda x: "\t\tAverage MSE = {}".format(sum(x)/len(x))
+)
 
 
 
@@ -58,23 +58,23 @@ rnnElmanStatistics = utl.evaluateNeuralNetworkForDifferentHiddenLayerSizes(\
 )
 
 
-# hiddenLayerSizes.append(-1)
-# print("\n\nEvaluating RBF:")
-# rbfStatistics = utl.evaluateNeuralNetworkForDifferentHiddenLayerSizes(\
-# 	train_daily_rbf_model.trainModel,
-# 	test_daily_rbf_model.evaluate,
-# 	hiddenLayerSizes,
-# 	numberOfTries,
-# 	lambda x: "\t\tAverage MSE = {}".format(sum(x)/len(x))
-# )
+hiddenLayerSizes.append(-1)
+print("\n\nEvaluating RBF:")
+rbfStatistics = utl.evaluateNeuralNetworkForDifferentHiddenLayerSizes(\
+	train_daily_rbf_model.trainModel,
+	test_daily_rbf_model.evaluate,
+	hiddenLayerSizes,
+	numberOfTries,
+	lambda x: "\t\tAverage MSE = {}".format(sum(x)/len(x))
+)
 
 
 
-# print("\n\nMLP statistics:")
-# utl.printStatistics(mlpStatistics)
+print("\n\nMLP statistics:")
+utl.printStatistics(mlpStatistics)
 
-# print("\n\nRBF statistics:")
-# utl.printStatistics(rbfStatistics)
+print("\n\nRBF statistics:")
+utl.printStatistics(rbfStatistics)
 
 
 print("\n\RNN JORDAN statistics:")
