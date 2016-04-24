@@ -39,7 +39,7 @@ def trainModel(unitsInHiddenLayer = 8, debug = True):
 
 if __name__ == "__main__":
 
-	model, errorsByEpoch = trainModel(2)
+	model, errorsByEpoch = trainModel(8)
 
 	print("Saving RNN Jordan Trained Model (Currency Exchange problem)")
 	utl.saveModelAtLocation(

@@ -6,6 +6,7 @@ Description: This file contains information used through out the project.
 import csv, os, pickle,  time, psutil
 from pybrain.datasets import SupervisedDataSet
 from pybrain.datasets import SequentialDataSet
+from pybrain.datasets import ClassificationDataSet
 from pybrain.supervised.trainers import BackpropTrainer, RPropMinusTrainer
 from pybrain.structure import SigmoidLayer
 from pybrain.structure import BiasUnit
@@ -52,6 +53,7 @@ class MLPTrainProcessConfiguration(object):
 		self.outputLayer = SigmoidLayer
 		self.momentum = 0.9
 		self.learningrate = 0.01
+		self.classes = []
 
 
 class RecurrentTrainProcessConfiguration(object):
@@ -165,8 +167,6 @@ def __createSupervisedDataSet(inputs, outputs):
 			inputs[r],
 			outputs[r]
 		)
-	
-
 
 	return dataset
 
@@ -418,7 +418,36 @@ def earlyStopTraining(crossValSet, neuralNetwork, configuration, trainer):
 			previousNetwork = neuralNetwork.copy()
 		trainingError = trainer.train()
 		errorsByEpoch.append(trainingError)
+		print epoch
 	return previousNetwork, errorsByEpoch
+
+
+
+def __createClassificationDataSet(inputs, outputs, configuration):
+	rows, numberOfFeatures = inputs.shape
+	
+
+	dataset = ClassificationDataSet(\
+		numberOfFeatures,
+		class_labels = configuration.classes,
+		 nb_classes=len(configuration.classes)
+	)
+	# dataset = SupervisedDataSet(\
+	# 	numberOfFeatures,
+	# 	outputSize
+	# )
+	
+	inputs = list(map(lambda x: tuple(x), inputs.tolist()))
+	outputs = list(map(lambda x: tuple(x), outputs.tolist()))
+	
+	for r in range(rows):
+		dataset.appendLinked(\
+			inputs[r],
+			outputs[r]
+		)
+
+	return dataset
+
 
 def trainMLPNetwork(\
 	inputs,
@@ -427,6 +456,8 @@ def trainMLPNetwork(\
 ):
 	rows, numberOfFeatures = inputs.shape
 	rows, outputSize = outputs.shape
+	
+	outputSize = (len(trainingConfiguration.classes))
 
 	neuralNetwork = buildNetwork(\
 			numberOfFeatures,
@@ -437,10 +468,14 @@ def trainMLPNetwork(\
 			hiddenclass = SigmoidLayer
 	)
 
-	dataset = __createSupervisedDataSet(\
+	dataset = __createClassificationDataSet(\
 		inputs,
-		outputs
+		outputs,
+		trainingConfiguration
 	)
+
+
+	dataset._convertToOneOfMany()
 	
 	trainSet, crossValSet = dataset.splitWithProportion( 0.75 )
 
@@ -551,7 +586,9 @@ class ClassificationResult(object):
 	"""ClassificationResult"""
 	def __init__(self, predictions, outputs, classMapper):
 		super(ClassificationResult, self).__init__()
+		
 		predictions = map(classMapper, predictions)
+
 		outputs = map(classMapper, outputs)
 		self.classes = set(predictions).union(set(outputs))
 		matrix = {
@@ -592,7 +629,7 @@ class ClassificationResult(object):
 def evaluateClassificationModel(model, inputs, outputs, label = '', debug = True, classMapper = lambda x: int(x[0])):
 	
 	customPrint(\
-		"Reading Training Data ({})".format(label),
+		"Reading Testing Data ({})".format(label),
 		debug
 	)
 
@@ -607,7 +644,6 @@ def evaluateClassificationModel(model, inputs, outputs, label = '', debug = True
 		np.round( model.activate( inputs[r] ) )
 		for r in range(rows)
 	])
-
 	
 
 	result = ClassificationResult(predictions, outputs, classMapper)
@@ -831,8 +867,8 @@ BREAST_CANCER_RBF_MODEL_FILE = "{}/../models/breast_cancer/breast_cancer_rbf_mod
 
 
 
-POKER_HANDS_TRAINING_FILE = "{}/../data/processed/poker_hand/poker-hand-training-true.csv".format(currentFileDir)
-POKER_HANDS_TESTING_FILE = "{}/../data/processed/poker_hand/poker-hand-testing.csv".format(currentFileDir)
+POKER_HANDS_TRAINING_FILE = "{}/../data/processed/poker_hand/training.csv".format(currentFileDir)
+POKER_HANDS_TESTING_FILE = "{}/../data/processed/poker_hand/testing.csv".format(currentFileDir)
 POKER_HANDS_MLP_MODEL_FILE = "{}/../models/poker_hand/poker_hand_mlp_model.pkl".format(currentFileDir)
 POKER_HANDS_RBF_MODEL_FILE = "{}/../models/poker_hand/poker_hand_rbf_model.pkl".format(currentFileDir)
 
