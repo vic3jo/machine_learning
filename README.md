@@ -4,88 +4,86 @@ Authors: Swati Bhartiya, Victor Trejo, and Utkarsh Bali
 Description: This project consists of solving multiple real world problems namely Cancer Prediction, 
 Poker Hands classification and Exchange rate prediction, using Neural Networks.
 
-Files:
-.
-├── data
-│ ├── processed
-│ │ ├── breast_cancer
-│ │ │ ├── testing.csv
-│ │ │ └── training.csv
-│ │ ├── currency_exchange
-│ │ │ ├── at_closing_day_testing.dat
-│ │ │ ├── at_closing_day_training.dat
-│ │ │ ├── hourly_testing.dat
-│ │ │ └── hourly_training.dat
-│ │ └── poker_hand
-│ │     ├── poker-hand-testing.csv
-│ │     └── poker-hand-training-true.csv
-│ └── unprocessed
-│     ├── breast_cancer
-│     │ └── breast_cancer.csv
-│     ├── currency_exchange
-│     │ ├── C1-5.dat
-│     │ └── C6-10.dat
-│     └── poker_hand
-│         ├── poker-hand-testing.data
-│         └── poker-hand-training-true.data
-├── models
-│ ├── breast_cancer
-│ │ ├── breast_cancer_mlp_model.pkl
-│ │ └── breast_cancer_rbf_model.pkl
-│ └── currency_exchange
-│   ├── at_closing_day_mlp_model.pkl
-│   ├── at_closing_day_rbf_model.pkl
-│   ├── hourly_mlp_model.pkl
-│   └── hourly_rbf_model.pkl
-├── README.md
-└── scripts
-    ├── breast_cancer
-    │ ├── breast_cancer_preprocessing.py
-    │ ├── evaluating_different_topologies.py
-    │ ├── evaluation_on_noisy_data.py
-    │ ├── mlp
-    │ │ ├── test_mlp_model.py
-    │ │ └── train_mlp_model.py
-    │ └── rbf
-    │     ├── test_rbf_model.py
-    │     └── train_rbf_model.py
-    ├── currency_exchange
-    │ ├── currency_exchange_preprocessing.py
-    │ ├── daily
-    │ │ ├── daily_evaluating_different_topologies.py
-    │ │ ├── daily_evaluation_on_noisy_data.py
-    │ │ ├── mlp
-    │ │ │ ├── test_daily_mlp_model.py
-    │ │ │ └── train_daily_mlp_model.py
-    │ │ └── rbf
-    │ │ |   ├── test_daily_rbf_model.py
-    │ │ |   └── train_daily_rbf_model.py
-    │ | └── rnn_elman
-    │ | |   ├── test_daily_rnn_elman_model.py
-    │ | |   └── train_daily_rnn_elman_model.py
-    │ | └── rnn_jordan
-    │ |       ├── test_daily_rnn_jordan_model.py
-    │ |       └── train_daily_rnn_jordan_model.py
-    | |
-    │ └── hourly
-    │     ├── hourly_evaluating_different_topologies.py
-    │     ├── hourly_evaluation_on_noisy_data.py
-    │     ├── mlp
-    │     │ ├── test_hourly_mlp_model.py
-    │     │ └── train_hourly_mlp_model.py
-    │     └── rbf
-    │     |   ├── test_hourly_rbf_model.py
-    │     |   └── train_hourly_rbf_model.py
-    │     └── rnn_elman
-    │     |   ├── test_hourly_rnn_elman_model.py
-    │     |   └── train_hourly_rnn_elman_model.py
-    │     └── rnn_jordan
-    │         ├── test_hourly_rnn_jordan_model.py
-    │         └── train_hourly_rnn_jordan_model.py
-    ├── poker_hand
-    │ ├── preprocessing_testing.py
-    │ └── preprocessing_training.py
-    └── utilities.py
+# Files
+    * data
+        ** processed
+            - breast_cancer
+                + testing.csv
+                + training.csv
+            - currency_exchange
+                + at_closing_day_testing.dat
+                + at_closing_day_training.dat
+                + hourly_testing.dat
+                + hourly_training.dat
+            - poker_hand
+                + poker-hand-testing.csv
+                + poker-hand-training-true.csv
+        ** unprocessed
+            - breast_cancer
+                + breast_cancer.csv
+            - currency_exchange
+                + C1-5.dat
+                + C6-10.dat
+            - poker_hand
+                + poker-hand-testing.data
+                + poker-hand-training-true.data
+    * models
+        ** breast_cancer
+            + breast_cancer_mlp_model.pkl
+            + breast_cancer_rbf_model.pkl
+        ** currency_exchange
+            + at_closing_day_mlp_model.pkl
+            + at_closing_day_rbf_model.pkl
+            + hourly_mlp_model.pkl
+            + hourly_rbf_model.pkl
+    * README.md
+    * scripts
+        ** breast_cancer
+            - breast_cancer_preprocessing.py
+            - evaluating_different_topologies.py
+            - evaluation_on_noisy_data.py
+            - mlp
+                + test_mlp_model.py
+                + train_mlp_model.py
+            - rbf
+                + test_rbf_model.py
+                + train_rbf_model.py
+        ** currency_exchange
+            - currency_exchange_preprocessing.py
+            - daily
+                + daily_evaluating_different_topologies.py
+                + daily_evaluation_on_noisy_data.py
+                + mlp
+                    . test_daily_mlp_model.py
+                    . train_daily_mlp_model.py
+                + rbf
+                    . test_daily_rbf_model.py
+                    . train_daily_rbf_model.py
+                + rnn_elman
+                    . test_daily_rnn_elman_model.py
+                    . train_daily_rnn_elman_model.py
+                + rnn_jordan
+                    . test_daily_rnn_jordan_model.py
+                    . train_daily_rnn_jordan_model.py
+            - hourly
+                + hourly_evaluating_different_topologies.py
+                + hourly_evaluation_on_noisy_data.py
+                + mlp
+                    . test_hourly_mlp_model.py
+                    . train_hourly_mlp_model.py
+                + rbf
+                    . test_hourly_rbf_model.py
+                    . train_hourly_rbf_model.py
+                + rnn_elman
+                    . test_hourly_rnn_elman_model.py
+                    . train_hourly_rnn_elman_model.py
+                + rnn_jordan
+                    . test_hourly_rnn_jordan_model.py
+                    . train_hourly_rnn_jordan_model.py
+       ** poker_hand
+            - preprocessing_testing.py
+            - preprocessing_training.py
+    * utilities.py
 
 
 
