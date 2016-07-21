@@ -165,19 +165,19 @@ Files Descriptions:
 
     Preprocessing:
 
-        	In order to apply the preprocessing tasks to the raw data sets the following should be done:
+            In order to apply the preprocessing tasks to the raw data sets the following should be done:
 
-        	1. Run: python scripts/breast_cancer/breast_cancer_preprocessing.py
-        		This is going to create two files (training.csv, testing.csv) at data/processed/breast_cancer/ directory
+            1. Run: python scripts/breast_cancer/breast_cancer_preprocessing.py
+                This is going to create two files (training.csv, testing.csv) at data/processed/breast_cancer/ directory
 
-        	2. Run: python scripts/currency_exchange/currencty_preprocessing.py
-        		This is going to create 4 files:
-        			 at_closing_day_training.csv
-        			 at_closing_day_testing.csv
-        			 hourly_training.csv
-        			 hourly_testing.csv
+            2. Run: python scripts/currency_exchange/currencty_preprocessing.py
+                This is going to create 4 files:
+                     at_closing_day_training.csv
+                     at_closing_day_testing.csv
+                     hourly_training.csv
+                     hourly_testing.csv
 
-        			 at data/processed/currency_exchange/ directory
+                     at data/processed/currency_exchange/ directory
                      
             3. Run: python scripts preprocessingTesting.py
                         AND
@@ -242,11 +242,11 @@ Files Descriptions:
 
 
 * Dependencies:
-	1. Python 2.7    		  - https://www.python.org/downloads/    and    
-								http://sourceforge.net/projects/numpy/files/NumPy/
-	2. Python Numpy   		  -	http://www.numpy.org/
-	3. Matplotlib			  - http://matplotlib.org/users/installing.html
-	4. PyWavelets 			  - http://www.pybytes.com/pywavelets/dev/building_extension.html
+    1. Python 2.7             - https://www.python.org/downloads/    and    
+                                http://sourceforge.net/projects/numpy/files/NumPy/
+    2. Python Numpy           - http://www.numpy.org/
+    3. Matplotlib             - http://matplotlib.org/users/installing.html
+    4. PyWavelets             - http://www.pybytes.com/pywavelets/dev/building_extension.html
     5. PyBrain                - http://pybrain.org/pages/download
 
-	
+    
